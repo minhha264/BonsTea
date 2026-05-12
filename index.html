@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bon's Tea | Fresh Fruit Tea – District 1, HCMC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:    #00c4b4;
+      --teal-dk: #009688;
+      --coral:   #ff6b6b;
+      --yellow:  #ffd166;
+      --ink:     #0d1b2a;
+      --mist:    #f0faf9;
+      --glass:   rgba(255,255,255,0.72);
+      --radius:  20px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--mist);
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ───────────────────────────── */
+    #bg-canvas {
+      position: fixed; 
+      inset: -20px; 
+      z-index: 0;
+      background-image: url('bg.png'); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(10px);
+      box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
+    }
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .4;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 600px; height: 600px; background: #4dd0e1; top: -150px; left: -120px; animation-delay: 0s; }
+    .blob-2 { width: 450px; height: 450px; background: #a5d6a7; top: 35%; right: -100px; animation-delay: -7s; }
+    .blob-3 { width: 400px; height: 400px; background: #ffd54f; bottom: 10%; left: 15%; animation-delay: -14s; }
+    .blob-4 { width: 300px; height: 300px; background: #f48fb1; top: 60%; left: 55%; animation-delay: -4s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,25px) scale(1.1); } }
+
+    /* ─── HEADER ────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.6);
+    }
+    .header-inner {
+      max-width: 1000px; margin: 0 auto;
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.7rem; line-height: 1;
+      background: linear-gradient(135deg, var(--teal-dk), var(--coral));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap; text-decoration: none;
+    }
+    nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #4a6270;
+      text-decoration: none; padding: 6px 12px; border-radius: 99px;
+      transition: background .2s, color .2s;
+      letter-spacing: .02em;
+    }
+    .nav-link:hover { background: rgba(0,198,180,.1); color: var(--teal-dk); }
+    .nav-link.active { background: var(--teal-dk); color: white; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .lang-toggle { display: flex; background: rgba(0,0,0,.06); border-radius: 99px; padding: 3px; gap: 2px; }
+    .lang-btn {
+      width: 32px; height: 32px; border-radius: 99px; border: none;
+      background: transparent; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s; filter: grayscale(1); opacity: .55;
+    }
+    .lang-btn.active { background: white; filter: grayscale(0); opacity: 1; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .phone-pill {
+      display: flex; flex-direction: column; align-items: flex-end;
+      background: white; border: 1.5px solid rgba(0,198,180,.25);
+      border-radius: 99px; padding: 4px 14px; line-height: 1.25;
+    }
+    .phone-label { font-size: .58rem; font-weight: 600; color: #94a3b8; letter-spacing: .1em; text-transform: uppercase; }
+    .phone-num   { font-size: .8rem; font-weight: 700; color: var(--teal-dk); }
+    .nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
+
+    /* ─── HERO ──────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 10;
+      min-height: 100svh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 60px 20px 80px;
+      overflow: hidden;
+    }
+    .hero-fruits {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .fruit-float {
+      position: absolute;
+      font-size: 3.5rem; line-height: 1;
+      animation: float-fruit 6s ease-in-out infinite;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.1));
+      user-select: none;
+    }
+    .fruit-float:nth-child(1)  { top: 8%;  left: 6%;  font-size: 3rem;  animation-delay: 0s;    animation-duration: 7s; }
+    .fruit-float:nth-child(2)  { top: 15%; right: 8%; font-size: 4rem;  animation-delay: -2s;   animation-duration: 6s; }
+    .fruit-float:nth-child(3)  { top: 55%; left: 3%;  font-size: 2.5rem;animation-delay: -4s;   animation-duration: 8s; }
+    .fruit-float:nth-child(4)  { top: 70%; right: 5%; font-size: 3.5rem;animation-delay: -1s;   animation-duration: 7s; }
+    .fruit-float:nth-child(5)  { top: 35%; left: 12%; font-size: 2rem;  animation-delay: -3s;   animation-duration: 9s; }
+    .fruit-float:nth-child(6)  { top: 25%; right:14%; font-size: 2.2rem;animation-delay: -5s;   animation-duration: 6.5s; }
+    .fruit-float:nth-child(7)  { bottom:12%;left: 18%;font-size: 2.8rem;animation-delay: -1.5s; animation-duration: 7.5s; }
+    .fruit-float:nth-child(8)  { bottom:18%;right:16%;font-size: 2rem;  animation-delay: -3.5s; animation-duration: 8.5s; }
+    @keyframes float-fruit {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50%      { transform: translateY(-22px) rotate(5deg); }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--yellow); color: var(--ink);
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 99px; margin-bottom: 20px;
+      animation: slide-up .7s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 10vw, 6.5rem);
+      font-weight: 900; line-height: 1.0;
+      color: var(--ink); margin-bottom: 12px;
+      animation: slide-up .7s cubic-bezier(.34,1.56,.64,1) .1s both;
+    }
+    .hero-title em { font-style: italic; color: var(--teal-dk); display: block; }
+    .hero-subtitle {
+      font-size: clamp(.95rem, 2.5vw, 1.15rem); color: #4a6270; font-weight: 400;
+      max-width: 420px; line-height: 1.65; margin-bottom: 32px;
+      animation: slide-up .7s cubic-bezier(.34,1.56,.64,1) .2s both;
+    }
+    .hero-cta-row {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      animation: slide-up .7s cubic-bezier(.34,1.56,.64,1) .3s both;
+    }
+    .btn-order {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dk));
+      color: white; font-weight: 700; font-size: .95rem; letter-spacing: .03em;
+      padding: 15px 32px; border-radius: 99px; text-decoration: none;
+      box-shadow: 0 8px 24px rgba(0,150,136,.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-order:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(0,150,136,.42); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--ink); font-weight: 600; font-size: .9rem;
+      padding: 14px 28px; border-radius: 99px; text-decoration: none;
+      border: 1.5px solid rgba(0,0,0,.1);
+      transition: border-color .2s, transform .2s;
+    }
+    .btn-ghost:hover { border-color: var(--teal); transform: translateY(-2px); }
+
+    .hero-price-badge {
+      margin-top: 40px; /* Đẩy xuống dưới 1 chút so với nút bấm */
+      display: inline-flex; align-items: center; gap: 6px;
+      background: white; border-radius: 99px; padding: 10px 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.1);
+      border: 1.5px solid rgba(0,198,180,.2);
+      white-space: normal;
+      max-width: 90%;
+      justify-content: center;
+      text-align: center;
+      flex-wrap: wrap;
+      /* Kết hợp 2 animation: 1 cái trượt lên, 1 cái breathing lặp lại */
+      animation: 
+        slide-up .7s cubic-bezier(.34,1.56,.64,1) .4s both,
+        breathe 3s ease-in-out 1.1s infinite;
+    }
+    .hero-price-text { font-size: .85rem; color: #64748b; font-weight: 500; }
+    .hero-price-val  { font-size: 1.4rem; font-weight: 800; color: var(--coral); }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes breathe {
+      0%   { transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+      50%  { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,198,180,.25); }
+      100% { transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    }
+
+    /* ─── SECTION SHARED ────────────────────────── */
+    section { position: relative; z-index: 10; }
+    .section-inner { max-width: 1000px; margin: 0 auto; padding: 72px 20px; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--teal-dk); margin-bottom: 12px;
+    }
+    .section-label::before { content: ''; display: block; width: 24px; height: 2px; background: var(--teal); border-radius: 2px; }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1;
+      color: var(--ink); margin-bottom: 16px;
+    }
+    .section-title em { font-style: italic; color: var(--teal-dk); }
+    .section-body { font-size: 1rem; color: #4a6270; line-height: 1.75; max-width: 520px; }
+
+    /* ─── WHY SECTION ───────────────────────────── */
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 40px; }
+    .why-card {
+      background: white; border-radius: var(--radius);
+      padding: 28px 24px;
+      border: 1.5px solid rgba(255,255,255,.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    }
+    .why-card:hover { transform: translateY(-6px); box-shadow: 0 14px 32px rgba(0,150,136,.14); }
+    .why-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin-bottom: 16px;
+    }
+    .why-card-title { font-weight: 700; font-size: 1.05rem; color: var(--ink); margin-bottom: 6px; }
+    .why-card-desc  { font-size: .87rem; color: #64748b; line-height: 1.6; }
+
+    /* ─── MENU PREVIEW ──────────────────────────── */
+    .menu-section { background: rgba(255,255,255,.45); backdrop-filter: blur(10px); }
+    .menu-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 36px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 20px; }
+
+    .menu-card {
+      background: white; border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.07);
+      border: 1.5px solid rgba(255,255,255,.9);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+    }
+    .menu-card:hover { transform: translateY(-7px); box-shadow: 0 18px 40px rgba(0,150,136,.18); }
+    
+    .menu-card-visual {
+      height: 220px; width: 100%;
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .menu-card-image {
+      width: 100%;
+      height: 100%;
+      transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    .menu-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .menu-card:hover .menu-card-image { transform: scale(1.08); }
+    
+    .menu-hot-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--coral); color: white;
+      font-size: .6rem; font-weight: 800; letter-spacing: .08em;
+      padding: 3px 9px; border-radius: 99px;
+      box-shadow: 0 3px 10px rgba(255,107,107,.4);
+    }
+    .menu-card-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+    .menu-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;
+    }
+    .menu-card-desc { font-size: .83rem; color: #64748b; line-height: 1.55; flex: 1; margin-bottom: 14px; }
+    .menu-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+    .menu-card-price { font-size: 1.1rem; font-weight: 800; color: var(--teal-dk); }
+    .menu-card-arrow {
+      width: 32px; height: 32px; border-radius: 99px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dk));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: .9rem;
+      box-shadow: 0 4px 12px rgba(0,150,136,.35);
+      transition: transform .2s;
+    }
+    .menu-card:hover .menu-card-arrow { transform: scale(1.12) rotate(45deg); }
+    .see-all-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--teal-dk); font-weight: 700; font-size: .9rem;
+      text-decoration: none; padding: 10px 20px;
+      border: 1.5px solid rgba(0,150,136,.3);
+      border-radius: 99px; transition: background .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .see-all-btn:hover { background: rgba(0,198,180,.08); border-color: var(--teal); }
+
+    /* ─── QUOTE SECTION ─────────────────────────── */
+    .quotes-section { background: var(--ink); }
+    .quotes-section .section-label { color: var(--yellow); }
+    .quotes-section .section-label::before { background: var(--yellow); }
+    .quotes-section .section-title { color: white; }
+    .quotes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 40px; }
+    .quote-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--radius); padding: 24px;
+      transition: transform .3s, background .2s;
+    }
+    .quote-card:hover { transform: translateY(-4px); background: rgba(255,255,255,.1); }
+    .quote-stars { color: var(--yellow); font-size: 1rem; letter-spacing: 2px; margin-bottom: 12px; }
+    .quote-text { font-size: .92rem; color: rgba(255,255,255,.85); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+    .quote-author { display: flex; align-items: center; gap: 10px; }
+    .quote-avatar {
+      width: 36px; height: 36px; border-radius: 99px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .quote-name  { font-weight: 700; font-size: .88rem; color: white; }
+    .quote-meta  { font-size: .75rem; color: rgba(255,255,255,.45); }
+
+    /* ─── LOCATION SECTION ──────────────────────── */
+    .location-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 40px;
+      align-items: start;
+    }
+    .location-info-list { display: flex; flex-direction: column; gap: 14px; }
+    .location-info-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: white; border-radius: 14px; padding: 16px 18px;
+      border: 1.5px solid rgba(0,198,180,.12);
+      box-shadow: 0 2px 12px rgba(0,0,0,.05);
+    }
+    .location-info-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .location-info-label { font-size: .7rem; font-weight: 700; color: #94a3b8; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 3px; }
+    .location-info-val   { font-size: .92rem; font-weight: 600; color: var(--ink); line-height: 1.5; }
+    .map-wrap {
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      border: 3px solid white; aspect-ratio: 4/3;
+    }
+    .map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+    /* map placeholder */
+    .map-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg,#e0f7f5,#b2dfdb);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    }
+    .map-placeholder-pin { font-size: 3rem; }
+    .map-placeholder-text { font-weight: 700; color: var(--teal-dk); font-size: .95rem; }
+    .map-placeholder-sub  { font-size: .8rem; color: #64748b; }
+
+    /* ─── FINAL CTA ─────────────────────────────── */
+    .cta-section { text-align: center; }
+    .cta-box {
+      background: linear-gradient(135deg, var(--teal-dk) 0%, #00897b 100%);
+      border-radius: 28px; padding: 60px 40px;
+      position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: '🍋🍊🍉🍍';
+      position: absolute; top: -10px; right: 20px;
+      font-size: 5rem; opacity: .15; letter-spacing: 8px;
+      pointer-events: none; user-select: none;
+    }
+    .cta-box-eyebrow { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.65); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+    .cta-box-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900;
+      color: white; line-height: 1.15; margin-bottom: 10px;
+    }
+    .cta-box-title em { font-style: italic; color: var(--yellow); }
+    .cta-box-sub { color: rgba(255,255,255,.75); font-size: .95rem; margin-bottom: 28px; }
+    .cta-box-price {
+      display: inline-flex; align-items: baseline; gap: 6px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px; padding: 8px 20px; margin-bottom: 28px;
+    }
+    .cta-box-price-label { color: rgba(255,255,255,.7); font-size: .85rem; }
+    .cta-box-price-val   { color: white; font-size: 1.4rem; font-weight: 800; }
+    .btn-order-white {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--teal-dk);
+      font-weight: 800; font-size: 1rem; letter-spacing: .02em;
+      padding: 16px 36px; border-radius: 99px; text-decoration: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-order-white:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 32px rgba(0,0,0,.28); }
+
+    /* ─── FOOTER ────────────────────────────────── */
+    footer {
+      position: relative; z-index: 10;
+      background: rgba(13,27,42,.97);
+      color: rgba(255,255,255,.6);
+      padding: 40px 20px 32px;
+    }
+    .footer-inner { max-width: 1000px; margin: 0 auto; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 28px; margin-bottom: 32px; }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: block; margin-bottom: 8px;
+    }
+    .footer-brand-desc { font-size: .84rem; line-height: 1.65; max-width: 200px; }
+    .footer-links-title { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-link { font-size: .88rem; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .footer-link:hover { color: var(--teal); }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,.08); margin-bottom: 20px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: .78rem; }
+    .footer-back-top {
+      font-size: .78rem; color: rgba(255,255,255,.4); text-decoration: none;
+      display: flex; align-items: center; gap: 5px; transition: color .2s;
+    }
+    .footer-back-top:hover { color: var(--teal); }
+
+    /* ─── SCROLL REVEAL ─────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .nav-mobile-toggle { display: flex; }
+      .phone-pill { display: none; }
+      .location-grid { grid-template-columns: 1fr; }
+      .cta-box { padding: 44px 24px; }
+      .footer-top { flex-direction: column; gap: 20px; }
+    }
+    @media (max-width: 500px) {
+      .hero-cta-row { flex-direction: column; align-items: center; }
+      .btn-order, .btn-ghost { width: 100%; max-width: 280px; justify-content: center; }
+      .hero-price-badge { padding: 8px 16px; border-radius: 24px; margin-top: 24px; }
+      .hero-price-text { font-size: .75rem; }
+      .hero-price-val { font-size: 1.15rem; }
+      .fruit-float:nth-child(5),
+      .fruit-float:nth-child(6),
+      .fruit-float:nth-child(7),
+      .fruit-float:nth-child(8) { display: none; }
+    }
+
+    /* ─── MOBILE NAV MENU ───────────────────────── */
+    .mobile-nav {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(13,27,42,.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .mobile-nav.open { opacity: 1; pointer-events: all; }
+    .mobile-nav-link {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; font-style: italic;
+      color: rgba(255,255,255,.6); text-decoration: none;
+      transition: color .2s;
+    }
+    .mobile-nav-link:hover { color: var(--teal); }
+    .mobile-nav-close {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,.1); border: none; border-radius: 99px;
+      width: 40px; height: 40px; color: white; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-nav-phone { margin-top: 20px; font-size: .9rem; color: var(--teal); font-weight: 700; }
+
+    /* i18n hidden */
+    [data-lang] { display: none; }
+    [data-lang].active { display: inline; }
+    [data-lang-block] { display: none; }
+    [data-lang-block].active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ANIMATED BACKGROUND -->
+<div id="bg-canvas">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <a class="mobile-nav-link" href="index.html" data-i18n-link="navHome">Home</a>
+  <a class="mobile-nav-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+  <a class="mobile-nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+  <a class="mobile-nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+  <div class="mobile-nav-phone">📞 0936 558 097</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="index.html">Bon's Tea</a>
+    <nav>
+      <a class="nav-link active" href="index.html" data-i18n-link="navHome">Home</a>
+      <a class="nav-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+      <a class="nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+      <a class="nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-lang-en" onclick="setLang('en')" title="English">🇬🇧</button>
+        <button class="lang-btn" id="btn-lang-ru" onclick="setLang('ru')" title="Русский">🇷🇺</button>
+      </div>
+      <div class="phone-pill">
+        <span class="phone-label" data-i18n="headerOrder">Order Now</span>
+        <span class="phone-num">0936 558 097</span>
+      </div>
+      <button class="nav-mobile-toggle" onclick="openMobileNav()" aria-label="Open menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="19" y2="6"/><line x1="3" y1="12" x2="19" y2="12"/><line x1="3" y1="18" x2="19" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── HERO ─────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-fruits" aria-hidden="true">
+    <span class="fruit-float">🍋</span>
+    <span class="fruit-float">🍉</span>
+    <span class="fruit-float">🍊</span>
+    <span class="fruit-float">🍍</span>
+    <span class="fruit-float">🍃</span>
+    <span class="fruit-float">🧊</span>
+    <span class="fruit-float">🍓</span>
+    <span class="fruit-float">🌿</span>
+  </div>
+
+  <span class="hero-eyebrow">
+    ☀️ <span data-i18n="heroBadge">District 1 · Ho Chi Minh City</span>
+  </span>
+
+  <h1 class="hero-title">
+    <span data-i18n="heroLine1">Fresh</span>
+    <em><span data-i18n="heroLine2">Fruit Tea</span></em>
+  </h1>
+
+  <p class="hero-subtitle" data-i18n="heroDesc">
+    Handcrafted daily with real tropical fruit. Cool down, sip up — delivered to your hotel door.
+  </p>
+
+  <div class="hero-cta-row">
+    <a class="btn-order" href="order.html">
+      <span data-i18n="heroOrderBtn">Order Now</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+    </a>
+    <a class="btn-ghost" href="#menu-preview">
+      <span data-i18n="heroMenuBtn">See the Menu</span> 👀
+    </a>
+  </div>
+
+  <!-- Bỏ thẻ div thừa, để trực tiếp xuống dưới cta-row -->
+  <div class="hero-price-badge">
+    <span class="hero-price-text" data-i18n="heroPriceLabel">All flavors only</span>
+    <span class="hero-price-val">45,000 VND</span>
+  </div>
+</div>
+
+<!-- ── WHY BON'S TEA ─────────────────────────────── -->
+<section id="why">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label" data-i18n="whyLabel">Why choose us</div>
+      <h2 class="section-title" data-i18n="whyTitle">Made with <em>real fruit</em>,<br>served with love</h2>
+      <p class="section-body" data-i18n="whyDesc">No powders. No shortcuts. Every cup is blended fresh in front of you, ready in minutes.</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="why-icon" style="background:#e0f7f5;">🍉</div>
+        <div class="why-card-title" data-i18n="why1Title">100% Fresh Fruit</div>
+        <div class="why-card-desc" data-i18n="why1Desc">Cut and blended to order, every single time. No premix, no artificial flavoring.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:#fff3e0;">⚡</div>
+        <div class="why-card-title" data-i18n="why2Title">Fast Delivery</div>
+        <div class="why-card-desc" data-i18n="why2Desc">Order by Zalo or our website. We deliver directly to your hotel room in District 1.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:#fce4ec;">💰</div>
+        <div class="why-card-title" data-i18n="why3Title">One Flat Price</div>
+        <div class="why-card-desc" data-i18n="why3Desc">Every flavor, every size — always 45,000 VND. Simple, honest, tourist-friendly.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:#e8f5e9;">🌏</div>
+        <div class="why-card-title" data-i18n="why4Title">English & Russian</div>
+        <div class="why-card-desc" data-i18n="why4Desc">Menu and ordering fully available in both languages. No language barrier.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MENU PREVIEW ──────────────────────────────── -->
+<section class="menu-section" id="menu-preview">
+  <div class="section-inner">
+    <div class="menu-header reveal">
+      <div>
+        <div class="section-label" data-i18n="menuLabel">Our drinks</div>
+        <h2 class="section-title" data-i18n="menuTitle">The <em>Menu</em></h2>
+      </div>
+      <a class="see-all-btn" href="order.html">
+        <span data-i18n="menuSeeAll">Order now</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </a>
+    </div>
+    <div class="menu-grid reveal" id="menu-grid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ── SOCIAL PROOF ──────────────────────────────── -->
+<section class="quotes-section">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label" data-i18n="quotesLabel">Happy guests</div>
+      <h2 class="section-title" data-i18n="quotesTitle">What tourists <em>say</em></h2>
+    </div>
+    <div class="quotes-grid reveal" id="quotes-grid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ── LOCATION ──────────────────────────────────── -->
+<section id="location">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label" data-i18n="locationLabel">Find us</div>
+      <h2 class="section-title" data-i18n="locationTitle">We're in<br><em>District 1</em></h2>
+    </div>
+    <div class="location-grid reveal">
+      <div class="location-info-list">
+        <div class="location-info-item">
+          <div class="location-info-icon" style="background:#e0f7f5;">📍</div>
+          <div>
+            <div class="location-info-label" data-i18n="locAddrLabel">Address</div>
+            <div class="location-info-val" data-i18n="locAddrVal">123 Giải Khát Street, District 1, Ho Chi Minh City</div>
+          </div>
+        </div>
+        <div class="location-info-item">
+          <div class="location-info-icon" style="background:#fff3e0;">⏰</div>
+          <div>
+            <div class="location-info-label" data-i18n="locHoursLabel">Opening Hours</div>
+            <div class="location-info-val" data-i18n="locHoursVal">Every day: 08:00 – 22:00</div>
+          </div>
+        </div>
+        <div class="location-info-item">
+          <div class="location-info-icon" style="background:#e8f5e9;">📞</div>
+          <div>
+            <div class="location-info-label" data-i18n="locContactLabel">Call / Zalo / WhatsApp</div>
+            <div class="location-info-val">0936 558 097</div>
+          </div>
+        </div>
+        <div class="location-info-item">
+          <div class="location-info-icon" style="background:#fce4ec;">🛵</div>
+          <div>
+            <div class="location-info-label" data-i18n="locDelivLabel">Delivery</div>
+            <div class="location-info-val" data-i18n="locDelivVal">Hotel delivery in D1 · Free for 2+ cups</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP EMBED — replace src with your actual Google Maps embed URL -->
+      <div class="map-wrap">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4!2d106.698!3d10.775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ2JzMwLjAiTiAxMDbCsDQxJzUyLjgiRQ!5e0!3m2!1sen!2s!4v1"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Bon's Tea location map">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ──────────────────────────────────── -->
+<section class="cta-section">
+  <div class="section-inner">
+    <div class="cta-box reveal">
+      <div class="cta-box-eyebrow" data-i18n="ctaEyebrow">Ready to order?</div>
+      <div class="cta-box-title">
+        <span data-i18n="ctaTitle1">Cool down with a</span><br>
+        <em data-i18n="ctaTitle2">fresh cup today</em>
+      </div>
+      <p class="cta-box-sub" data-i18n="ctaSub">Pick your flavor, drop your address, we'll handle the rest.</p>
+      <div style="margin-bottom:28px;">
+        <div class="cta-box-price">
+          <span class="cta-box-price-label" data-i18n="ctaPriceLabel">All flavors —</span>
+          <span class="cta-box-price-val">45,000 VND</span>
+        </div>
+      </div>
+      <a class="btn-order-white" href="order.html">
+        <span data-i18n="ctaBtn">Order on the website</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Bon's Tea</a>
+        <p class="footer-brand-desc" data-i18n="footerDesc">Fresh tropical fruit teas, crafted daily in District 1, HCMC.</p>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerNavTitle">Pages</div>
+        <div class="footer-links">
+          <a class="footer-link" href="index.html" data-i18n-link="navHome">Home</a>
+          <a class="footer-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+          <a class="footer-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+          <a class="footer-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerContactTitle">Contact</div>
+        <div class="footer-links">
+          <span class="footer-link">📞 0936 558 097</span>
+          <span class="footer-link" data-i18n="footerAddr">📍 123 Giải Khát St, D1</span>
+          <span class="footer-link" data-i18n="footerHours">⏰ 08:00 – 22:00 daily</span>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span class="footer-copy" data-i18n="footerCopy">© 2025 Bon's Tea. All rights reserved.</span>
+      <a class="footer-back-top" href="#">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+        <span data-i18n="footerTop">Back to top</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ─── I18N ───────────────────────────────────── */
+  let currentLang = 'en';
+
+  const t = {
+    en: {
+      headerOrder: "Order Now",
+      heroBadge: "District 1 · Ho Chi Minh City",
+      heroLine1: "Fresh", heroLine2: "Fruit Tea",
+      heroDesc: "Handcrafted daily with real tropical fruit. Cool down, sip up — delivered to your hotel door.",
+      heroOrderBtn: "Order Now", heroMenuBtn: "See the Menu",
+      heroPriceLabel: "All flavors only",
+      whyLabel: "Why choose us",
+      whyTitle: "Made with <em>real fruit</em>,<br>served with love",
+      whyDesc: "No powders. No shortcuts. Every cup is blended fresh in front of you, ready in minutes.",
+      why1Title: "100% Fresh Fruit",   why1Desc: "Cut and blended to order, every single time. No premix, no artificial flavoring.",
+      why2Title: "Fast Delivery",      why2Desc: "Order by Zalo or our website. We deliver directly to your hotel room in District 1.",
+      why3Title: "One Flat Price",     why3Desc: "Every flavor, every size — always 45,000 VND. Simple, honest, tourist-friendly.",
+      why4Title: "English & Russian",  why4Desc: "Menu and ordering fully available in both languages. No language barrier.",
+      menuLabel: "Our drinks", menuTitle: "The <em>Menu</em>", menuSeeAll: "Order now",
+      quotesLabel: "Happy guests", quotesTitle: "What tourists <em>say</em>",
+      locationLabel: "Find us", locationTitle: "We're in<br><em>District 1</em>",
+      locAddrLabel: "Address",    locAddrVal: "123 Giải Khát Street, District 1, Ho Chi Minh City",
+      locHoursLabel: "Opening Hours", locHoursVal: "Every day: 08:00 – 22:00",
+      locContactLabel: "Call / Zalo / WhatsApp",
+      locDelivLabel: "Delivery", locDelivVal: "Hotel delivery in D1 · Free for 2+ cups",
+      ctaEyebrow: "Ready to order?",
+      ctaTitle1: "Cool down with a", ctaTitle2: "fresh cup today",
+      ctaSub: "Pick your flavor, drop your address, we'll handle the rest.",
+      ctaPriceLabel: "All flavors —", ctaBtn: "Order on the website",
+      footerDesc: "Fresh tropical fruit teas, crafted daily in District 1, HCMC.",
+      footerNavTitle: "Pages", footerContactTitle: "Contact",
+      footerAddr: "📍 123 Giải Khát St, D1", footerHours: "⏰ 08:00 – 22:00 daily",
+      footerCopy: "© 2025 Bon's Tea. All rights reserved.", footerTop: "Back to top",
+      navHome: "Home", navMenu: "Menu & Order", navGallery: "Gallery", navContact: "Contact",
+    },
+    ru: {
+      headerOrder: "Заказать",
+      heroBadge: "Район 1 · Хошимин",
+      heroLine1: "Свежий", heroLine2: "Фруктовый Чай",
+      heroDesc: "Готовится каждый день из настоящих тропических фруктов. Освежитесь — доставим прямо в отель.",
+      heroOrderBtn: "Заказать сейчас", heroMenuBtn: "Смотреть меню",
+      heroPriceLabel: "Все вкусы всего",
+      whyLabel: "Почему мы",
+      whyTitle: "Из настоящих <em>фруктов</em>,<br>с любовью",
+      whyDesc: "Без порошков. Без компромиссов. Каждый стакан готовится на ваших глазах за несколько минут.",
+      why1Title: "100% свежие фрукты",   why1Desc: "Нарезаем и смешиваем под каждый заказ. Никаких готовых смесей.",
+      why2Title: "Быстрая доставка",      why2Desc: "Заказывайте через Zalo или сайт. Доставляем прямо в номер в Районе 1.",
+      why3Title: "Одна цена",             why3Desc: "Любой вкус, любой размер — всегда 45 000 VND. Честно и удобно для туристов.",
+      why4Title: "Английский и русский",  why4Desc: "Меню и заказ полностью доступны на обоих языках.",
+      menuLabel: "Наши напитки", menuTitle: "Наше <em>Меню</em>", menuSeeAll: "Заказать сейчас",
+      quotesLabel: "Довольные гости", quotesTitle: "Что говорят <em>туристы</em>",
+      locationLabel: "Где нас найти", locationTitle: "Мы в<br><em>Районе 1</em>",
+      locAddrLabel: "Адрес",    locAddrVal: "ул. Гяй Хат 123, Район 1, Хошимин",
+      locHoursLabel: "Часы работы", locHoursVal: "Каждый день: 08:00 – 22:00",
+      locContactLabel: "Звонок / Zalo / WhatsApp",
+      locDelivLabel: "Доставка", locDelivVal: "Доставка в отели Района 1 · Бесплатно от 2 стаканов",
+      ctaEyebrow: "Готовы к заказу?",
+      ctaTitle1: "Освежитесь", ctaTitle2: "прямо сейчас",
+      ctaSub: "Выберите вкус, укажите адрес — всё остальное сделаем мы.",
+      ctaPriceLabel: "Все вкусы —", ctaBtn: "Заказать на сайте",
+      footerDesc: "Свежие тропические фруктовые чаи, каждый день в Районе 1, Хошимин.",
+      footerNavTitle: "Страницы", footerContactTitle: "Контакты",
+      footerAddr: "📍 ул. Гяй Хат 123, Район 1", footerHours: "⏰ 08:00 – 22:00 ежедневно",
+      footerCopy: "© 2025 Bon's Tea. Все права защищены.", footerTop: "Наверх",
+      navHome: "Главная", navMenu: "Меню и заказ", navGallery: "Галерея", navContact: "Контакты",
+    }
+  };
+
+  window.setLang = function(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-lang-' + lang).classList.add('active');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (t[lang][k] !== undefined) el.innerHTML = t[lang][k];
+    });
+    document.querySelectorAll('[data-i18n-link]').forEach(el => {
+      const k = el.getAttribute('data-i18n-link');
+      if (t[lang][k] !== undefined) el.textContent = t[lang][k];
+    });
+    renderDynamicContent();
+  };
+
+  /* ─── DATA ───────────────────────────────────── */
+  const menuData = {
+    en: [
+      { image:'01.png', color:'#d4f7f2', name:'Pineapple Mint Tea',   desc:'Pineapple + mint + pandan tea. Super fresh & cooling.', tag:'Bestseller' },
+      { image:'02.png', color:'#fde8d8', name:'Passion Orange Tea',  desc:'Passion fruit + orange + tea. Sweet & sour — most popular.', tag:'#1 Popular' },
+      { image:'03.png', color:'#fde8f0', name:'Watermelon Lime Tea', desc:'Fresh watermelon + lime + tea. Light & refreshing.', tag:'Summer Fave' },
+    ],
+    ru: [
+      { image:'01.png', color:'#d4f7f2', name:'Ананасово-Мятный Чай',   desc:'Ананас + мята + чай пандан. Освежающий вкус.', tag:'Хит продаж' },
+      { image:'02.png', color:'#fde8d8', name:'Маракуйя Апельсин',  desc:'Маракуйя + апельсин + чай. Кисло-сладкий — самый популярный.', tag:'№1 популярный' },
+      { image:'03.png', color:'#fde8f0', name:'Арбузный Лайм Чай', desc:'Арбуз + лайм + чай. Лёгкий и освежающий.', tag:'Летний фаворит' },
+    ]
+  };
+
+  const quotesData = {
+    en: [
+      { stars:5, text:'Ordered twice in one day — that\'s how good it was! The pineapple mint is incredible. Fast delivery to my hotel.', name:'Sarah M.', meta:'🇬🇧 Backpacker, D1', avatar:'🧡' },
+      { stars:5, text:'Finally found a place that actually uses real fruit. 45K for this quality is crazy cheap. Already told everyone at my hostel.', name:'James K.', meta:'🇦🇺 Traveller, HCMC', avatar:'💚' },
+      { stars:5, text:'We ordered for our whole group. Super fast, super fresh. The watermelon lime is a masterpiece on a hot day.', name:'Elena P.', meta:'🇷🇺 Tourist, Saigon', avatar:'💙' },
+    ],
+    ru: [
+      { stars:5, text:'Заказала дважды за один день — настолько вкусно! Ананасово-мятный просто невероятный. Быстро доставили в отель.', name:'Сара М.', meta:'🇬🇧 Путешественница, Район 1', avatar:'🧡' },
+      { stars:5, text:'Наконец нашла место с настоящими фруктами. 45 000 VND за такое качество — просто невероятно. Уже всем рассказала.', name:'Джеймс К.', meta:'🇦🇺 Путешественник, Хошимин', avatar:'💚' },
+      { stars:5, text:'Заказали на всю группу. Быстро и свежо. Арбузный лайм в жаркий день — просто шедевр.', name:'Елена П.', meta:'🇷🇺 Турист, Сайгон', avatar:'💙' },
+    ]
+  };
+
+  function renderDynamicContent() {
+    /* MENU GRID */
+    const grid = document.getElementById('menu-grid');
+    grid.innerHTML = menuData[currentLang].map(item => `
+      <a class="menu-card" href="order.html">
+        <div class="menu-card-visual" style="background:${item.color};">
+          <div class="menu-card-image"><img src="${item.image}" alt="${item.name}"></div>
+          <div class="menu-hot-badge">${item.tag}</div>
+        </div>
+        <div class="menu-card-body">
+          <div class="menu-card-name">${item.name}</div>
+          <div class="menu-card-desc">${item.desc}</div>
+          <div class="menu-card-footer">
+            <span class="menu-card-price">45,000 VND</span>
+            <div class="menu-card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    /* QUOTES */
+    const qgrid = document.getElementById('quotes-grid');
+    qgrid.innerHTML = quotesData[currentLang].map(q => `
+      <div class="quote-card">
+        <div class="quote-stars">${'★'.repeat(q.stars)}</div>
+        <div class="quote-text">"${q.text}"</div>
+        <div class="quote-author">
+          <div class="quote-avatar" style="background:rgba(255,255,255,.1);">${q.avatar}</div>
+          <div>
+            <div class="quote-name">${q.name}</div>
+            <div class="quote-meta">${q.meta}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ─── SCROLL REVEAL ──────────────────────────── */
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  /* ─── MOBILE NAV ─────────────────────────────── */
+  window.openMobileNav  = () => document.getElementById('mobile-nav').classList.add('open');
+  window.closeMobileNav = () => document.getElementById('mobile-nav').classList.remove('open');
+
+  /* ─── INIT ───────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    setLang('en');
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  });
+</script>
+</body>
+</html>

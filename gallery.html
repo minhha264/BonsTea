@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bon's Tea | Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:    #00c4b4;
+      --teal-dk: #009688;
+      --coral:   #ff6b6b;
+      --yellow:  #ffd166;
+      --ink:     #0d1b2a;
+      --mist:    #f0faf9;
+      --glass:   rgba(255,255,255,0.72);
+      --radius:  20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── BACKGROUND ──────────────────────────────── */
+    #bg-canvas {
+      position: fixed; 
+      inset: -20px; 
+      z-index: 0;
+      background-image: url('bg.png'); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(10px);
+      box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
+    }
+
+    /* ── HEADER ──────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.6);
+    }
+    .header-inner {
+      max-width: 1000px; margin: 0 auto;
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.7rem; line-height: 1;
+      background: linear-gradient(135deg, var(--teal-dk), var(--coral));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap; text-decoration: none;
+    }
+    nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #4a6270;
+      text-decoration: none; padding: 6px 12px; border-radius: 99px;
+      transition: background .2s, color .2s;
+      letter-spacing: .02em;
+    }
+    .nav-link:hover { background: rgba(0,198,180,.1); color: var(--teal-dk); }
+    .nav-link.active { background: var(--teal-dk); color: white; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .lang-toggle { display: flex; background: rgba(0,0,0,.06); border-radius: 99px; padding: 3px; gap: 2px; }
+    .lang-btn {
+      width: 32px; height: 32px; border-radius: 99px; border: none;
+      background: transparent; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s; filter: grayscale(1); opacity: .55;
+    }
+    .lang-btn.active { background: white; filter: grayscale(0); opacity: 1; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .phone-pill {
+      display: flex; flex-direction: column; align-items: flex-end;
+      background: white; border: 1.5px solid rgba(0,198,180,.25);
+      border-radius: 99px; padding: 4px 14px; line-height: 1.25;
+    }
+    .phone-label { font-size: .58rem; font-weight: 600; color: #94a3b8; letter-spacing: .1em; text-transform: uppercase; }
+    .phone-num   { font-size: .8rem; font-weight: 700; color: var(--teal-dk); }
+    .nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
+
+    /* ── MOBILE NAV MENU ─────────────────────────── */
+    .mobile-nav {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(13,27,42,.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .mobile-nav.open { opacity: 1; pointer-events: all; }
+    .mobile-nav-link {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; font-style: italic;
+      color: rgba(255,255,255,.6); text-decoration: none;
+      transition: color .2s;
+    }
+    .mobile-nav-link:hover { color: var(--teal); }
+    .mobile-nav-close {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,.1); border: none; border-radius: 99px;
+      width: 40px; height: 40px; color: white; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-nav-phone { margin-top: 20px; font-size: .9rem; color: var(--teal); font-weight: 700; }
+
+    /* ── GALLERY HEADER ──────────────────────────── */
+    .gallery-header {
+      position: relative; z-index: 10;
+      max-width: 1000px; margin: 0 auto;
+      padding: 40px 20px 20px;
+      text-align: center;
+    }
+    .gallery-eyebrow {
+      display: inline-block;
+      background: var(--yellow); color: var(--ink);
+      font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 99px; margin-bottom: 14px;
+    }
+    .gallery-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 8vw, 4.5rem);
+      font-weight: 900; line-height: 1.05;
+      color: var(--ink);
+    }
+    .gallery-title em { font-style: italic; color: var(--teal-dk); }
+
+    /* ── MASONRY GALLERY GRID ────────────────────── */
+    main {
+      flex: 1;
+      position: relative; z-index: 10;
+      max-width: 1200px; margin: 0 auto;
+      padding: 20px 20px 60px;
+      width: 100%;
+    }
+    
+    .masonry-grid {
+      column-count: 4;
+      column-gap: 16px;
+    }
+
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 16px;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      background: white;
+      border: 1px solid rgba(255,255,255,0.6);
+      cursor: pointer;
+    }
+
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      /* Add minimum height to prevent glitching before image loads */
+      min-height: 150px; 
+      object-fit: cover;
+    }
+
+    .masonry-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* Gradient overlay for text readability */
+    .masonry-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 40%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .masonry-item:hover::after {
+      opacity: 1;
+    }
+
+    .masonry-tag {
+      position: absolute;
+      bottom: 16px; left: 16px;
+      background: var(--teal);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 12px rgba(0, 196, 180, 0.4);
+      z-index: 2;
+    }
+
+    /* Tag color variations */
+    .tag-coral { background: var(--coral); box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4); }
+    .tag-yellow { background: var(--yellow); color: var(--ink); box-shadow: 0 4px 12px rgba(255, 209, 102, 0.4); }
+    .tag-dark { background: var(--ink); box-shadow: 0 4px 12px rgba(13, 27, 42, 0.4); }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 1024px) {
+      .masonry-grid { column-count: 3; }
+    }
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .nav-mobile-toggle { display: flex; }
+      .phone-pill { display: none; }
+      .masonry-grid { column-count: 2; column-gap: 12px; }
+      .masonry-item { margin-bottom: 12px; border-radius: 12px; }
+      .masonry-tag { bottom: 12px; left: 12px; font-size: 0.6rem; padding: 4px 10px; }
+    }
+    @media (max-width: 480px) {
+      .masonry-grid { column-count: 1; }
+    }
+
+    /* ── FOOTER (Synced) ─────────────────────────── */
+    footer {
+      position: relative; z-index: 10;
+      background: rgba(13,27,42,.97);
+      color: rgba(255,255,255,.6);
+      padding: 40px 20px 40px;
+    }
+    .footer-inner { max-width: 1000px; margin: 0 auto; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 28px; margin-bottom: 32px; }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: block; margin-bottom: 8px;
+    }
+    .footer-brand-desc { font-size: .84rem; line-height: 1.65; max-width: 200px; }
+    .footer-links-title { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-link { font-size: .88rem; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .footer-link:hover { color: var(--teal); }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,.08); margin-bottom: 20px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: .78rem; }
+    .footer-back-top {
+      font-size: .78rem; color: rgba(255,255,255,.4); text-decoration: none;
+      display: flex; align-items: center; gap: 5px; transition: color .2s;
+    }
+    .footer-back-top:hover { color: var(--teal); }
+  </style>
+</head>
+<body>
+
+<div id="bg-canvas"></div>
+
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <a class="mobile-nav-link" href="index.html" data-i18n-link="navHome">Home</a>
+  <a class="mobile-nav-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+  <a class="mobile-nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+  <a class="mobile-nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+  <div class="mobile-nav-phone">📞 0936 558 097</div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="index.html">Bon's Tea</a>
+    <nav>
+      <a class="nav-link" href="index.html" data-i18n-link="navHome">Home</a>
+      <a class="nav-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+      <a class="nav-link active" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+      <a class="nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-lang-en" onclick="setLang('en')" title="English">🇬🇧</button>
+        <button class="lang-btn" id="btn-lang-ru" onclick="setLang('ru')" title="Русский">🇷🇺</button>
+      </div>
+      <div class="phone-pill">
+        <span class="phone-label" data-i18n="headerOrder">Order Now</span>
+        <span class="phone-num">0936 558 097</span>
+      </div>
+      <button class="nav-mobile-toggle" onclick="openMobileNav()" aria-label="Open menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="19" y2="6"/><line x1="3" y1="12" x2="19" y2="12"/><line x1="3" y1="18" x2="19" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="gallery-header">
+  <span class="gallery-eyebrow" data-i18n="galleryEyebrow">Moments</span>
+  <h2 class="gallery-title" data-i18n-html="galleryTitle">Our <em>Gallery</em></h2>
+</div>
+
+<main>
+  <div class="masonry-grid">
+    <div class="masonry-item">
+      <img src="img0.png" alt="Gallery Image 0">
+      <div class="masonry-tag tag-coral">BON'S VIBE</div>
+    </div>
+    
+    <div class="masonry-item">
+      <img src="img1.png" alt="Gallery Image 1">
+      <div class="masonry-tag tag-yellow">FRESH TEA</div>
+    </div>
+
+    <div class="masonry-item">
+      <img src="img2.png" alt="Gallery Image 2">
+      <div class="masonry-tag">BESTSELLER</div>
+    </div>
+
+    <div class="masonry-item">
+      <img src="img3.png" alt="Gallery Image 3">
+    </div>
+
+    <div class="masonry-item">
+      <img src="img4.png" alt="Gallery Image 4">
+      <div class="masonry-tag tag-dark">SUMMER</div>
+    </div>
+
+    <div class="masonry-item">
+      <img src="img5.png" alt="Gallery Image 5">
+    </div>
+
+    <div class="masonry-item">
+      <img src="img6.png" alt="Gallery Image 6">
+      <div class="masonry-tag">TROPICAL</div>
+    </div>
+
+    <div class="masonry-item">
+      <img src="img7.png" alt="Gallery Image 7">
+    </div>
+
+    <div class="masonry-item">
+      <img src="img8.png" alt="Gallery Image 8">
+      <div class="masonry-tag tag-coral">SAIGON</div>
+    </div>
+
+    <div class="masonry-item">
+      <img src="img9.png" alt="Gallery Image 9">
+    </div>
+
+    <div class="masonry-item">
+      <img src="img10.png" alt="Gallery Image 10">
+      <div class="masonry-tag tag-yellow">DELICIOUS</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Bon's Tea</a>
+        <p class="footer-brand-desc" data-i18n="footerDesc">Fresh tropical fruit teas, crafted daily in District 1, HCMC.</p>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerNavTitle">Pages</div>
+        <div class="footer-links">
+          <a class="footer-link" href="index.html" data-i18n-link="navHome">Home</a>
+          <a class="footer-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+          <a class="footer-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+          <a class="footer-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerContactTitle">Contact</div>
+        <div class="footer-links">
+          <span class="footer-link">📞 0936 558 097</span>
+          <span class="footer-link" data-i18n="footerAddr">📍 123 Giải Khát St, D1</span>
+          <span class="footer-link" data-i18n="footerHours">⏰ 08:00 – 22:00 daily</span>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span class="footer-copy" data-i18n="footerCopy">© 2025 Bon's Tea. All rights reserved.</span>
+      <a class="footer-back-top" href="#">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+        <span data-i18n="footerTop">Back to top</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  let currentLang = 'en';
+
+  const translations = {
+    en: {
+      headerOrder: "Order Now",
+      galleryEyebrow: "Moments",
+      galleryTitle: "Our <em>Gallery</em>",
+      footerDesc: "Fresh tropical fruit teas, crafted daily in District 1, HCMC.",
+      footerNavTitle: "Pages", 
+      footerContactTitle: "Contact",
+      footerAddr: "📍 123 Giải Khát St, D1", 
+      footerHours: "⏰ 08:00 – 22:00 daily",
+      footerCopy: "© 2025 Bon's Tea. All rights reserved.", 
+      footerTop: "Back to top",
+      navHome: "Home", 
+      navMenu: "Menu & Order", 
+      navGallery: "Gallery", 
+      navContact: "Contact"
+    },
+    ru: {
+      headerOrder: "Заказать",
+      galleryEyebrow: "Моменты",
+      galleryTitle: "Наша <em>Галерея</em>",
+      footerDesc: "Свежие тропические фруктовые чаи, каждый день в Районе 1, Хошимин.",
+      footerNavTitle: "Страницы", 
+      footerContactTitle: "Контакты",
+      footerAddr: "📍 ул. Гяй Хат 123, Район 1", 
+      footerHours: "⏰ 08:00 – 22:00 ежедневно",
+      footerCopy: "© 2025 Bon's Tea. Все права защищены.", 
+      footerTop: "Наверх",
+      navHome: "Главная", 
+      navMenu: "Меню и заказ", 
+      navGallery: "Галерея", 
+      navContact: "Контакты"
+    }
+  };
+
+  window.setLang = function(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-lang-' + lang).classList.add('active');
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (translations[lang][k]) el.textContent = translations[lang][k];
+    });
+    
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const k = el.getAttribute('data-i18n-html');
+      if (translations[lang][k]) el.innerHTML = translations[lang][k];
+    });
+
+    document.querySelectorAll('[data-i18n-link]').forEach(el => {
+      const k = el.getAttribute('data-i18n-link');
+      if (translations[lang][k] !== undefined) el.textContent = translations[lang][k];
+    });
+  };
+
+  /* ─── MOBILE NAV FUNCTIONS ────────────── */
+  window.openMobileNav  = () => document.getElementById('mobile-nav').classList.add('open');
+  window.closeMobileNav = () => document.getElementById('mobile-nav').classList.remove('open');
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    setLang('en');
+  });
+</script>
+</body>
+</html>

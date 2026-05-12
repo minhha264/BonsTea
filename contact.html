@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bon's Tea | Contact & Location</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:    #00c4b4;
+      --teal-dk: #009688;
+      --coral:   #ff6b6b;
+      --yellow:  #ffd166;
+      --ink:     #0d1b2a;
+      --mist:    #f0faf9;
+      --glass:   rgba(255,255,255,0.72);
+      --radius:  20px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--mist);
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ─────────────────────────────── */
+    #bg-canvas {
+  position: fixed; 
+  inset: -20px; /* Cố tình làm to hơn màn hình một chút để khi blur không bị viền trắng */
+  z-index: 0;
+  
+  /* Thay url ảnh của bạn vào đây */
+  background-image: url('bg.png'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Tạo độ mờ cho ảnh (tăng giảm tuỳ ý từ 10px đến 30px) */
+  filter: blur(10px);
+  
+  /* Thêm một lớp màu trắng mờ phủ lên trên để đảm bảo chữ màu đen (var(--ink)) luôn dễ đọc */
+  /* Nếu ảnh tạo ra quá sáng, có thể bỏ dòng này đi */
+  box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
+}
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .4;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 600px; height: 600px; background: #4dd0e1; top: -150px; left: -120px; animation-delay: 0s; }
+    .blob-2 { width: 450px; height: 450px; background: #a5d6a7; top: 35%; right: -100px; animation-delay: -7s; }
+    .blob-3 { width: 400px; height: 400px; background: #ffd54f; bottom: 10%; left: 15%; animation-delay: -14s; }
+    .blob-4 { width: 300px; height: 300px; background: #f48fb1; top: 60%; left: 55%; animation-delay: -4s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,25px) scale(1.1); } }
+
+    /* ─── HEADER ─────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.6);
+    }
+    .header-inner {
+      max-width: 1000px; margin: 0 auto;
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.7rem; line-height: 1;
+      background: linear-gradient(135deg, var(--teal-dk), var(--coral));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap; text-decoration: none;
+    }
+    nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #4a6270;
+      text-decoration: none; padding: 6px 12px; border-radius: 99px;
+      transition: background .2s, color .2s; letter-spacing: .02em;
+    }
+    .nav-link:hover { background: rgba(0,198,180,.1); color: var(--teal-dk); }
+    .nav-link.active { background: var(--teal-dk); color: white; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .lang-toggle { display: flex; background: rgba(0,0,0,.06); border-radius: 99px; padding: 3px; gap: 2px; }
+    .lang-btn {
+      width: 32px; height: 32px; border-radius: 99px; border: none;
+      background: transparent; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s; filter: grayscale(1); opacity: .55;
+    }
+    .lang-btn.active { background: white; filter: grayscale(0); opacity: 1; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .phone-pill {
+      display: flex; flex-direction: column; align-items: flex-end;
+      background: white; border: 1.5px solid rgba(0,198,180,.25);
+      border-radius: 99px; padding: 4px 14px; line-height: 1.25;
+    }
+    .phone-label { font-size: .58rem; font-weight: 600; color: #94a3b8; letter-spacing: .1em; text-transform: uppercase; }
+    .phone-num   { font-size: .8rem; font-weight: 700; color: var(--teal-dk); }
+    .nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
+
+    /* ─── MOBILE NAV ─────────────────────────────── */
+    .mobile-nav {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(13,27,42,.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .mobile-nav.open { opacity: 1; pointer-events: all; }
+    .mobile-nav-link {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; font-style: italic;
+      color: rgba(255,255,255,.6); text-decoration: none; transition: color .2s;
+    }
+    .mobile-nav-link:hover { color: var(--teal); }
+    .mobile-nav-close {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,.1); border: none; border-radius: 99px;
+      width: 40px; height: 40px; color: white; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-nav-phone { margin-top: 20px; font-size: .9rem; color: var(--teal); font-weight: 700; }
+
+    /* ─── PAGE HERO ──────────────────────────────── */
+    .page-hero {
+      position: relative; z-index: 10;
+      padding: 64px 20px 48px; text-align: center;
+    }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--teal-dk); margin-bottom: 12px;
+    }
+    .section-label::before { content:''; display:block; width:24px; height:2px; background:var(--teal); border-radius:2px; }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 7vw, 4rem); font-weight: 900; line-height: 1.05;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .page-title em { font-style: italic; color: var(--teal-dk); }
+    .page-subtitle { font-size: 1rem; color: #4a6270; max-width: 440px; margin: 0 auto; line-height: 1.7; }
+
+    /* ─── MAIN WRAPPER ───────────────────────────── */
+    .main-wrap { position: relative; z-index: 10; max-width: 1000px; margin: 0 auto; padding: 0 20px 80px; }
+
+    /* ─── CONTACT CHANNEL CARDS ──────────────────── */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 48px;
+    }
+    .channel-card {
+      background: white; border-radius: var(--radius);
+      padding: 24px 20px 20px;
+      border: 1.5px solid rgba(255,255,255,.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+      text-decoration: none; color: inherit;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .2s;
+    }
+    .channel-card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px rgba(0,150,136,.16); border-color: rgba(0,198,180,.3); }
+    .channel-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .channel-label { font-size: .68rem; font-weight: 700; color: #94a3b8; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 2px; }
+    .channel-value { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+    .channel-hint  { font-size: .8rem; color: #64748b; line-height: 1.5; }
+    .channel-tap-badge {
+      margin-top: auto; display: inline-flex; align-items: center; gap: 5px;
+      font-size: .72rem; font-weight: 700; color: var(--teal-dk);
+      background: rgba(0,198,180,.1); border-radius: 99px; padding: 4px 10px;
+    }
+
+    /* ─── TWO-COL GRID: MAP + INFO ───────────────── */
+    .location-section { margin-bottom: 48px; }
+    .location-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 20px; color: var(--ink);
+    }
+    .location-section-title em { font-style: italic; color: var(--teal-dk); }
+    .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+    /* map */
+    .map-card {
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,.1);
+      border: 3px solid white;
+      aspect-ratio: 1 / 1;
+    }
+    .map-card iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    /* info stack */
+    .info-stack { display: flex; flex-direction: column; gap: 12px; }
+    .info-item {
+      background: white; border-radius: 16px;
+      padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 14px;
+      border: 1.5px solid rgba(0,198,180,.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .info-icon {
+      width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .info-label { font-size: .68rem; font-weight: 700; color: #94a3b8; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
+    .info-val   { font-size: .92rem; font-weight: 600; color: var(--ink); line-height: 1.55; }
+    .info-val a { color: var(--teal-dk); text-decoration: none; }
+    .info-val a:hover { text-decoration: underline; }
+
+    /* hours table */
+    .hours-row { display: flex; justify-content: space-between; font-size: .87rem; padding: 3px 0; }
+    .hours-day  { color: #64748b; font-weight: 500; }
+    .hours-time { font-weight: 700; color: var(--ink); }
+    .hours-open { color: var(--teal-dk); font-weight: 700; font-size: .75rem; margin-left: 8px; }
+
+    /* ─── FAQ SECTION ────────────────────────────── */
+    .faq-section { margin-bottom: 48px; }
+    .faq-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 20px; color: var(--ink);
+    }
+    .faq-section-title em { font-style: italic; color: var(--teal-dk); }
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    .faq-item {
+      background: white; border-radius: 16px;
+      border: 1.5px solid rgba(0,198,180,.12);
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; cursor: pointer;
+      user-select: none;
+      gap: 12px;
+    }
+    .faq-question:hover { background: rgba(0,198,180,.04); }
+    .faq-q-text { font-weight: 600; font-size: .95rem; color: var(--ink); line-height: 1.4; }
+    .faq-chevron {
+      width: 28px; height: 28px; flex-shrink: 0;
+      border-radius: 99px; background: #f0faf9;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--teal-dk); font-size: .75rem;
+      transition: transform .3s, background .2s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); background: rgba(0,198,180,.15); }
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height .35s ease, padding .35s ease;
+      padding: 0 20px;
+    }
+    .faq-item.open .faq-answer { max-height: 200px; padding: 0 20px 18px; }
+    .faq-answer-text { font-size: .88rem; color: #4a6270; line-height: 1.7; border-top: 1px solid #f1f5f9; padding-top: 14px; }
+
+    /* ─── QUICK MESSAGE SECTION ──────────────────── */
+    .message-section { margin-bottom: 48px; }
+    .message-section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: var(--ink);
+    }
+    .message-section-title em { font-style: italic; color: var(--teal-dk); }
+    .message-section-sub { font-size: .9rem; color: #4a6270; margin-bottom: 20px; }
+    .message-card {
+      background: white; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,198,180,.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+    .message-card-inner { padding: 28px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: .78rem; font-weight: 700; color: var(--ink); letter-spacing: .02em; }
+    .form-label .req { color: var(--coral); margin-left: 2px; }
+    .form-input, .form-textarea, .form-select {
+      padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      font-family: inherit; font-size: .9rem; color: var(--ink); background: #f8fafc;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,198,180,.13); background: white;
+    }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-group-full { margin-bottom: 14px; }
+    .btn-send {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dk));
+      color: white; font-weight: 700; font-size: .95rem;
+      padding: 14px 28px; border: none; border-radius: 99px; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,150,136,.32);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,150,136,.4); }
+    .form-note { font-size: .75rem; color: #94a3b8; margin-top: 8px; }
+
+    /* success toast */
+    .toast {
+      display: none; align-items: center; gap: 10px;
+      background: var(--ink); color: white;
+      padding: 14px 20px; border-radius: 14px;
+      font-size: .9rem; font-weight: 500; margin-top: 16px;
+    }
+    .toast.show { display: flex; animation: toast-in .4s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── FINAL CTA ──────────────────────────────── */
+    .cta-box {
+      background: linear-gradient(135deg, var(--teal-dk) 0%, #00897b 100%);
+      border-radius: 28px; padding: 52px 40px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: '🍋🍊🍉🍍';
+      position: absolute; top: -10px; right: 20px;
+      font-size: 4.5rem; opacity: .12; letter-spacing: 8px;
+      pointer-events: none; user-select: none;
+    }
+    .cta-eyebrow { font-size: .68rem; font-weight: 700; color: rgba(255,255,255,.6); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+    .cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900;
+      color: white; line-height: 1.2; margin-bottom: 10px;
+    }
+    .cta-title em { font-style: italic; color: var(--yellow); }
+    .cta-sub { color: rgba(255,255,255,.72); font-size: .92rem; margin-bottom: 24px; }
+    .btn-order-white {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--teal-dk);
+      font-weight: 800; font-size: .95rem;
+      padding: 14px 32px; border-radius: 99px; text-decoration: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,.18);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-order-white:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 28px rgba(0,0,0,.26); }
+
+    /* ─── FOOTER ─────────────────────────────────── */
+    footer {
+      position: relative; z-index: 10;
+      background: rgba(13,27,42,.97);
+      color: rgba(255,255,255,.6);
+      padding: 40px 20px 32px;
+    }
+    .footer-inner { max-width: 1000px; margin: 0 auto; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 28px; margin-bottom: 32px; }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: block; margin-bottom: 8px;
+    }
+    .footer-brand-desc { font-size: .84rem; line-height: 1.65; max-width: 200px; }
+    .footer-links-title { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-link { font-size: .88rem; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .footer-link:hover { color: var(--teal); }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,.08); margin-bottom: 20px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: .78rem; }
+    .footer-back-top { font-size: .78rem; color: rgba(255,255,255,.4); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color .2s; }
+    .footer-back-top:hover { color: var(--teal); }
+
+    /* ─── SCROLL REVEAL ──────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .nav-mobile-toggle { display: flex; }
+      .phone-pill { display: none; }
+      .loc-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .cta-box { padding: 40px 24px; }
+      .footer-top { flex-direction: column; gap: 20px; }
+    }
+    @media (max-width: 480px) {
+      .channels-grid { grid-template-columns: 1fr 1fr; }
+      .message-card-inner { padding: 20px; }
+    }
+    @media (max-width: 340px) {
+      .channels-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="bg-canvas">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <a class="mobile-nav-link" href="index.html"   data-i18n-link="navHome">Home</a>
+  <a class="mobile-nav-link" href="order.html"   data-i18n-link="navMenu">Menu & Order</a>
+  <a class="mobile-nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+  <a class="mobile-nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+  <div class="mobile-nav-phone">📞 0936 558 097</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="index.html">Bon's Tea</a>
+    <nav>
+      <a class="nav-link" href="index.html"   data-i18n-link="navHome">Home</a>
+      <a class="nav-link" href="order.html"   data-i18n-link="navMenu">Menu & Order</a>
+      <a class="nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+      <a class="nav-link active" href="contact.html" data-i18n-link="navContact">Contact</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-lang-en" onclick="setLang('en')" title="English">🇬🇧</button>
+        <button class="lang-btn" id="btn-lang-ru" onclick="setLang('ru')" title="Русский">🇷🇺</button>
+      </div>
+      <div class="phone-pill">
+        <span class="phone-label" data-i18n="headerOrder">Order Now</span>
+        <span class="phone-num">0936 558 097</span>
+      </div>
+      <button class="nav-mobile-toggle" onclick="openMobileNav()" aria-label="Open menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="19" y2="6"/><line x1="3" y1="12" x2="19" y2="12"/><line x1="3" y1="18" x2="19" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="section-label" data-i18n="heroLabel">Get in touch</div>
+  <h1 class="page-title">
+    <span data-i18n="heroTitle1">Say hello</span> &amp; <em data-i18n="heroTitle2">find us</em>
+  </h1>
+  <p class="page-subtitle" data-i18n="heroSub">
+    Questions, orders, or just want to say hi — we're always happy to hear from you.
+  </p>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- ── CONTACT CHANNELS ──────────────────────── -->
+  <div class="channels-grid reveal" id="channels-grid">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- ── LOCATION + MAP ────────────────────────── -->
+  <div class="location-section reveal">
+    <div class="location-section-title" data-i18n="locTitle">Where to <em>find us</em></div>
+    <div class="loc-grid">
+
+      <!-- MAP -->
+      <div class="map-card">
+        <!-- Replace src with your real Google Maps embed URL -->
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4776581377345!2d106.69591!3d10.77569!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f3a9b7d3a51%3A0x98e7314d4c2ec0!2sBen%20Thanh%20Market!5e0!3m2!1sen!2svn!4v1"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Bon's Tea – District 1, HCMC">
+        </iframe>
+      </div>
+
+      <!-- INFO STACK -->
+      <div class="info-stack">
+        <div class="info-item">
+          <div class="info-icon" style="background:#e0f7f5;">📍</div>
+          <div>
+            <div class="info-label" data-i18n="infoAddrLabel">Address</div>
+            <div class="info-val" data-i18n="infoAddrVal">123 Giải Khát Street<br>District 1, Ho Chi Minh City</div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" style="background:#fff8e1;">⏰</div>
+          <div style="width:100%">
+            <div class="info-label" data-i18n="infoHoursLabel">Opening Hours</div>
+            <div class="info-val" id="hours-table"><!-- rendered by JS --></div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" style="background:#e8f5e9;">🛵</div>
+          <div>
+            <div class="info-label" data-i18n="infoDelivLabel">Delivery Zone</div>
+            <div class="info-val" data-i18n="infoDelivVal">District 1 hotels · Free shipping for 2+ cups</div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon" style="background:#fce4ec;">💳</div>
+          <div>
+            <div class="info-label" data-i18n="infoPayLabel">Payment</div>
+            <div class="info-val" data-i18n="infoPayVal">Cash on delivery · Bank transfer · Momo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FAQ ──────────────────────────────────── -->
+  <div class="faq-section reveal">
+    <div class="faq-section-title" data-i18n="faqTitle">Frequently <em>asked</em></div>
+    <div class="faq-list" id="faq-list">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── QUICK MESSAGE ─────────────────────────── -->
+  <div class="message-section reveal">
+    <div class="message-section-title" data-i18n="msgTitle">Send us a <em>message</em></div>
+    <p class="message-section-sub" data-i18n="msgSub">Not ready to order yet? Leave us a note — we'll get back to you on Zalo or WhatsApp.</p>
+    <div class="message-card">
+      <div class="message-card-inner">
+        <form action="https://docs.google.com/forms/d/e/1FAIpQLSd2obDIxpqNsD-DI6Y7U95y7b5kYeHUiCe3egKDAZEqFGpe5g/formResponse"
+              method="POST" target="msg_iframe" id="contact-form" onsubmit="handleMsgSubmit()">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label"><span data-i18n="msgLblName">Your Name</span><span class="req">*</span></label>
+              <input type="text" name="entry.1584277093" required class="form-input" data-i18n-placeholder="msgPlaceholderName"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><span data-i18n="msgLblContact">Phone / WhatsApp</span><span class="req">*</span></label>
+              <input type="text" name="entry.1910847976" required class="form-input" data-i18n-placeholder="msgPlaceholderContact"/>
+            </div>
+          </div>
+          <div class="form-group-full">
+            <label class="form-label" data-i18n="msgLblTopic">Topic</label>
+            <select class="form-select" name="entry.75177064" id="topic-select">
+              <!-- rendered by JS -->
+            </select>
+          </div>
+          <div class="form-group-full">
+            <label class="form-label"><span data-i18n="msgLblMsg">Message</span><span class="req">*</span></label>
+            <textarea name="entry.529463192" required class="form-textarea" data-i18n-placeholder="msgPlaceholderMsg"></textarea>
+          </div>
+          <button type="submit" class="btn-send">
+            <span data-i18n="msgBtn">Send message</span>
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+          </button>
+          <div class="form-note" data-i18n="msgNote">We'll reply via Zalo or WhatsApp within a few hours.</div>
+        </form>
+        <div class="toast" id="msg-toast">
+          <span>🎉</span> <span data-i18n="msgSuccess">Message sent! We'll reach out soon.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FINAL CTA ──────────────────────────────── -->
+  <div class="cta-box reveal">
+    <div class="cta-eyebrow" data-i18n="ctaEyebrow">Thirsty already?</div>
+    <div class="cta-title">
+      <span data-i18n="ctaTitle1">Skip the wait —</span><br>
+      <em data-i18n="ctaTitle2">order online now</em>
+    </div>
+    <p class="cta-sub" data-i18n="ctaSub">All flavors · 45,000 VND · Delivered to your door</p>
+    <a class="btn-order-white" href="order.html">
+      <span data-i18n="ctaBtn">Go to Order Page</span>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+    </a>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Bon's Tea</a>
+        <p class="footer-brand-desc" data-i18n="footerDesc">Fresh tropical fruit teas, crafted daily in District 1, HCMC.</p>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerNavTitle">Pages</div>
+        <div class="footer-links">
+          <a class="footer-link" href="index.html"   data-i18n-link="navHome">Home</a>
+          <a class="footer-link" href="order.html"   data-i18n-link="navMenu">Menu & Order</a>
+          <a class="footer-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+          <a class="footer-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerContactTitle">Contact</div>
+        <div class="footer-links">
+          <span class="footer-link">📞 0936 558 097</span>
+          <span class="footer-link" data-i18n="footerAddr">📍 123 Giải Khát St, D1</span>
+          <span class="footer-link" data-i18n="footerHours">⏰ 08:00 – 22:00 daily</span>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span class="footer-copy" data-i18n="footerCopy">© 2025 Bon's Tea. All rights reserved.</span>
+      <a class="footer-back-top" href="#">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+        <span data-i18n="footerTop">Back to top</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<iframe name="msg_iframe" id="msg_iframe" style="display:none" onload="if(window.msgSubmitted){showMsgSuccess();}"></iframe>
+
+<script>
+  let currentLang = 'en';
+  let msgSubmitted = false;
+
+  /* ─── TRANSLATIONS ───────────────────────────── */
+  const t = {
+    en: {
+      headerOrder: "Order Now",
+      heroLabel: "Get in touch", heroTitle1: "Say hello", heroTitle2: "find us",
+      heroSub: "Questions, orders, or just want to say hi — we're always happy to hear from you.",
+      locTitle: "Where to <em>find us</em>",
+      infoAddrLabel: "Address",   infoAddrVal: "123 Giải Khát Street<br>District 1, Ho Chi Minh City",
+      infoHoursLabel: "Opening Hours",
+      infoDelivLabel: "Delivery Zone", infoDelivVal: "District 1 hotels · Free shipping for 2+ cups",
+      infoPayLabel: "Payment", infoPayVal: "Cash on delivery · Bank transfer · Momo",
+      faqTitle: "Frequently <em>asked</em>",
+      msgTitle: "Send us a <em>message</em>",
+      msgSub: "Not ready to order yet? Leave us a note — we'll get back to you on Zalo or WhatsApp.",
+      msgLblName: "Your Name", msgLblContact: "Phone / WhatsApp",
+      msgLblTopic: "Topic", msgLblMsg: "Message",
+      msgPlaceholderName: "e.g. Sarah", msgPlaceholderContact: "+84 or your number",
+      msgPlaceholderMsg: "Ask anything — allergies, delivery area, bulk orders...",
+      msgBtn: "Send message",
+      msgNote: "We'll reply via Zalo or WhatsApp within a few hours.",
+      msgSuccess: "Message sent! We'll reach out soon.",
+      ctaEyebrow: "Thirsty already?", ctaTitle1: "Skip the wait —", ctaTitle2: "order online now",
+      ctaSub: "All flavors · 45,000 VND · Delivered to your door", ctaBtn: "Go to Order Page",
+      footerDesc: "Fresh tropical fruit teas, crafted daily in District 1, HCMC.",
+      footerNavTitle: "Pages", footerContactTitle: "Contact",
+      footerAddr: "📍 123 Giải Khát St, D1", footerHours: "⏰ 08:00 – 22:00 daily",
+      footerCopy: "© 2025 Bon's Tea. All rights reserved.", footerTop: "Back to top",
+      navHome: "Home", navMenu: "Menu & Order", navGallery: "Gallery", navContact: "Contact",
+    },
+    ru: {
+      headerOrder: "Заказать",
+      heroLabel: "Связаться с нами", heroTitle1: "Напишите нам", heroTitle2: "найдите нас",
+      heroSub: "Вопросы, заказы или просто хотите поздороваться — мы всегда рады вам.",
+      locTitle: "Как нас <em>найти</em>",
+      infoAddrLabel: "Адрес", infoAddrVal: "ул. Гяй Хат 123<br>Район 1, Хошимин",
+      infoHoursLabel: "Часы работы",
+      infoDelivLabel: "Зона доставки", infoDelivVal: "Отели Района 1 · Бесплатно от 2 стаканов",
+      infoPayLabel: "Оплата", infoPayVal: "Наличные · Банковский перевод · Momo",
+      faqTitle: "Частые <em>вопросы</em>",
+      msgTitle: "Напишите нам <em>сообщение</em>",
+      msgSub: "Не готовы к заказу? Оставьте сообщение — мы ответим через Zalo или WhatsApp.",
+      msgLblName: "Ваше имя", msgLblContact: "Телефон / WhatsApp",
+      msgLblTopic: "Тема", msgLblMsg: "Сообщение",
+      msgPlaceholderName: "напр. Елена", msgPlaceholderContact: "+7 или ваш номер",
+      msgPlaceholderMsg: "Любые вопросы — аллергии, зона доставки, большие заказы...",
+      msgBtn: "Отправить",
+      msgNote: "Мы ответим через Zalo или WhatsApp в течение нескольких часов.",
+      msgSuccess: "Сообщение отправлено! Скоро ответим.",
+      ctaEyebrow: "Уже хочется пить?", ctaTitle1: "Не ждите —", ctaTitle2: "заказывайте онлайн",
+      ctaSub: "Все вкусы · 45 000 VND · Доставка до отеля", ctaBtn: "Перейти к заказу",
+      footerDesc: "Свежие тропические фруктовые чаи, каждый день в Районе 1, Хошимин.",
+      footerNavTitle: "Страницы", footerContactTitle: "Контакты",
+      footerAddr: "📍 ул. Гяй Хат 123, Район 1", footerHours: "⏰ 08:00 – 22:00 ежедневно",
+      footerCopy: "© 2025 Bon's Tea. Все права защищены.", footerTop: "Наверх",
+      navHome: "Главная", navMenu: "Меню и заказ", navGallery: "Галерея", navContact: "Контакты",
+    }
+  };
+
+  /* ─── DYNAMIC DATA ───────────────────────────── */
+  const channels = {
+    en: [
+      { icon:'📞', bg:'#e0f7f5', label:'Call us', value:'0936 558 097', hint:'Available 08:00 – 22:00 daily', tap:'Tap to call', href:'tel:0936558097' },
+      { icon:'💬', bg:'#e8f5e9', label:'Zalo',    value:'0936 558 097', hint:'Chat in Vietnamese or English', tap:'Open Zalo', href:'https://zalo.me/0936558097' },
+      { icon:'🟢', bg:'#f3fff4', label:'WhatsApp', value:'0936 558 097', hint:'English & Russian supported', tap:'Open WhatsApp', href:'https://wa.me/84936558097' },
+      { icon:'🏠', bg:'#fff8e1', label:'Visit us',  value:'D1, HCMC', hint:'123 Giải Khát St, District 1', tap:'See on map', href:'#location' },
+    ],
+    ru: [
+      { icon:'📞', bg:'#e0f7f5', label:'Позвонить', value:'0936 558 097', hint:'Доступно 08:00 – 22:00 ежедневно', tap:'Позвонить', href:'tel:0936558097' },
+      { icon:'💬', bg:'#e8f5e9', label:'Zalo',      value:'0936 558 097', hint:'Чат на русском, английском или вьетнамском', tap:'Открыть Zalo', href:'https://zalo.me/0936558097' },
+      { icon:'🟢', bg:'#f3fff4', label:'WhatsApp',  value:'0936 558 097', hint:'Поддержка на русском и английском', tap:'Открыть WhatsApp', href:'https://wa.me/84936558097' },
+      { icon:'🏠', bg:'#fff8e1', label:'Приехать',  value:'Район 1, Хошимин', hint:'ул. Гяй Хат 123, Район 1', tap:'На карте', href:'#location' },
+    ]
+  };
+
+  const hours = {
+    en: [
+      { day:'Mon – Fri', time:'08:00 – 22:00', open:true },
+      { day:'Saturday',  time:'08:00 – 22:00', open:true },
+      { day:'Sunday',    time:'09:00 – 21:00', open:true },
+    ],
+    ru: [
+      { day:'Пн – Пт', time:'08:00 – 22:00', open:true },
+      { day:'Суббота', time:'08:00 – 22:00', open:true },
+      { day:'Воскресенье', time:'09:00 – 21:00', open:true },
+    ]
+  };
+
+  const faqs = {
+    en: [
+      { q: 'What area do you deliver to?', a: 'We deliver to hotels and guesthouses in District 1, Ho Chi Minh City. If you\'re just outside D1, message us on Zalo — we\'ll do our best to reach you.' },
+      { q: 'How long does delivery take?', a: 'Usually 20–40 minutes depending on where you\'re staying. We\'ll let you know as soon as your order is on the way.' },
+      { q: 'Can I customise sugar or ice levels?', a: 'Absolutely! You can specify less sugar, no sugar, less ice, or no ice in the Notes field when you order. We\'ll make it exactly as you like.' },
+      { q: 'Do you cater for allergies?', a: 'Our drinks contain fresh fruit, pandan tea, and sometimes mint or lime. If you have a specific allergy, please mention it in your order notes or message us directly before ordering.' },
+      { q: 'How do I pay?', a: 'We accept cash on delivery (VND), bank transfer, and Momo e-wallet. No card machines — all digital or cash.' },
+      { q: 'Can I order for a group?', a: 'Yes! We love group orders. Order as many cups as you need through the website, or message us on Zalo for large bulk orders.' },
+    ],
+    ru: [
+      { q: 'В какой район вы доставляете?', a: 'Мы доставляем в отели и гестхаусы Района 1, Хошимин. Если вы немного за пределами — напишите нам в Zalo, постараемся добраться.' },
+      { q: 'Сколько времени занимает доставка?', a: 'Обычно 20–40 минут, в зависимости от вашего местонахождения. Мы сообщим, как только заказ будет в пути.' },
+      { q: 'Можно настроить уровень сахара и льда?', a: 'Конечно! Укажите меньше сахара, без сахара, меньше льда или без льда в поле «Примечания». Сделаем именно так, как вы хотите.' },
+      { q: 'Есть ли у вас аллергены?', a: 'Напитки содержат свежие фрукты, чай пандан, иногда мяту или лайм. Если у вас аллергия — укажите это в примечаниях к заказу или напишите нам заранее.' },
+      { q: 'Как можно оплатить?', a: 'Принимаем наличные (VND), банковский перевод и кошелёк Momo. Карты не принимаем — только цифровые способы или наличные.' },
+      { q: 'Можно сделать групповой заказ?', a: 'Да! Мы любим большие заказы. Заказывайте через сайт или напишите нам в Zalo для оптовых заказов.' },
+    ]
+  };
+
+  const topics = {
+    en: ['General question', 'Delivery enquiry', 'Bulk / group order', 'Allergy question', 'Other'],
+    ru: ['Общий вопрос', 'Вопрос о доставке', 'Групповой заказ', 'Вопрос об аллергии', 'Другое']
+  };
+
+  /* ─── RENDER DYNAMIC ─────────────────────────── */
+  function renderAll() {
+    const lang = currentLang;
+
+    /* channels */
+    document.getElementById('channels-grid').innerHTML = channels[lang].map(c => `
+      <a class="channel-card" href="${c.href}">
+        <div class="channel-icon" style="background:${c.bg};">${c.icon}</div>
+        <div>
+          <div class="channel-label">${c.label}</div>
+          <div class="channel-value">${c.value}</div>
+          <div class="channel-hint">${c.hint}</div>
+        </div>
+        <div class="channel-tap-badge">
+          ${c.tap}
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+      </a>
+    `).join('');
+
+    /* hours table */
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    document.getElementById('hours-table').innerHTML = hours[lang].map(row => {
+      const isOpen = nowMins >= 8*60 && nowMins < 22*60;
+      return `
+        <div class="hours-row">
+          <span class="hours-day">${row.day}</span>
+          <span class="hours-time">
+            ${row.time}
+            ${isOpen ? `<span class="hours-open">● Open now</span>` : ''}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+    /* faqs */
+    document.getElementById('faq-list').innerHTML = faqs[lang].map((f, i) => `
+      <div class="faq-item" id="faq-${i}">
+        <div class="faq-question" onclick="toggleFaq(${i})">
+          <div class="faq-q-text">${f.q}</div>
+          <div class="faq-chevron">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          </div>
+        </div>
+        <div class="faq-answer"><div class="faq-answer-text">${f.a}</div></div>
+      </div>
+    `).join('');
+
+    /* topic select */
+    document.getElementById('topic-select').innerHTML = topics[lang].map(tp =>
+      `<option value="${tp}">${tp}</option>`
+    ).join('');
+
+    /* placeholders */
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const k = el.getAttribute('data-i18n-placeholder');
+      if (t[lang][k]) el.placeholder = t[lang][k];
+    });
+  }
+
+  /* ─── LANG ───────────────────────────────────── */
+  window.setLang = function(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-lang-' + lang).classList.add('active');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (t[lang][k] !== undefined) el.innerHTML = t[lang][k];
+    });
+    document.querySelectorAll('[data-i18n-link]').forEach(el => {
+      const k = el.getAttribute('data-i18n-link');
+      if (t[lang][k] !== undefined) el.textContent = t[lang][k];
+    });
+    renderAll();
+  };
+
+  /* ─── FAQ TOGGLE ─────────────────────────────── */
+  window.toggleFaq = function(i) {
+    const item = document.getElementById('faq-' + i);
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  };
+
+  /* ─── FORM ───────────────────────────────────── */
+  window.handleMsgSubmit = function() { window.msgSubmitted = true; };
+  window.showMsgSuccess  = function() {
+    if (!window.msgSubmitted) return;
+    document.getElementById('contact-form').reset();
+    const toast = document.getElementById('msg-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 5000);
+    window.msgSubmitted = false;
+  };
+
+  /* ─── REVEAL ─────────────────────────────────── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 90);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  /* ─── MOBILE NAV ─────────────────────────────── */
+  window.openMobileNav  = () => document.getElementById('mobile-nav').classList.add('open');
+  window.closeMobileNav = () => document.getElementById('mobile-nav').classList.remove('open');
+
+  /* ─── INIT ───────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    setLang('en');
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  });
+</script>
+</body>
+</html>

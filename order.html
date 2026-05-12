@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bon's Tea | Fresh Fruit Tea</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:    #00c4b4;
+      --teal-dk: #009688;
+      --coral:   #ff6b6b;
+      --yellow:  #ffd166;
+      --ink:     #0d1b2a;
+      --mist:    #f0faf9;
+      --glass:   rgba(255,255,255,0.72);
+      --radius:  20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ──────────────────────────────── */
+#bg-canvas {
+  position: fixed; 
+  inset: -20px; /* Cố tình làm to hơn màn hình một chút để khi blur không bị viền trắng */
+  z-index: 0;
+  
+  /* Thay url ảnh của bạn vào đây */
+  background-image: url('bg.png'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Tạo độ mờ cho ảnh (tăng giảm tuỳ ý từ 10px đến 30px) */
+  filter: blur(2px);
+  
+  /* Thêm một lớp màu trắng mờ phủ lên trên để đảm bảo chữ màu đen (var(--ink)) luôn dễ đọc */
+  /* Nếu ảnh tạo ra quá sáng, có thể bỏ dòng này đi */
+  box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
+}
+
+/* Nếu bạn dùng ảnh, bạn có thể xoá các thẻ <div class="blob"> đi vì ảnh đã loang màu sẵn rồi */
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 500px; height: 500px; background: #4dd0e1; top: -120px; left: -100px; animation-delay: 0s; }
+    .blob-2 { width: 400px; height: 400px; background: #a5d6a7; top: 30%; right: -80px; animation-delay: -6s; }
+    .blob-3 { width: 350px; height: 350px; background: #ffd54f; bottom: 5%; left: 20%; animation-delay: -12s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px, 20px) scale(1.08); } }
+
+    /* ── FLOATING FRUITS (High Intensity) ────────── */
+    .bg-fruits {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1;
+    }
+    .fruit-float {
+      position: absolute;
+      line-height: 1;
+      animation: float-fruit 6s ease-in-out infinite;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.1));
+      user-select: none;
+      opacity: 0.85;
+    }
+    /* 14 scattered fruits with varying properties */
+    .fruit-float:nth-child(1)  { top: 6%;   left: 5%;   font-size: 3rem;   animation-delay: 0s;    animation-duration: 7s; }
+    .fruit-float:nth-child(2)  { top: 12%;  right: 7%;  font-size: 4rem;   animation-delay: -2s;   animation-duration: 6s; }
+    .fruit-float:nth-child(3)  { top: 22%;  left: -2%;  font-size: 4.5rem; animation-delay: -4s;   animation-duration: 8s; opacity: 0.4; filter: blur(3px); }
+    .fruit-float:nth-child(4)  { top: 30%;  right: 15%; font-size: 2.2rem; animation-delay: -1s;   animation-duration: 7s; }
+    .fruit-float:nth-child(5)  { top: 40%;  left: 10%;  font-size: 3.5rem; animation-delay: -3s;   animation-duration: 9s; }
+    .fruit-float:nth-child(6)  { top: 55%;  right: -3%; font-size: 5rem;   animation-delay: -5s;   animation-duration: 6.5s; opacity: 0.5; filter: blur(2px); }
+    .fruit-float:nth-child(7)  { top: 65%;  left: 18%;  font-size: 2rem;   animation-delay: -1.5s; animation-duration: 7.5s; }
+    .fruit-float:nth-child(8)  { top: 72%;  right: 22%; font-size: 3.2rem; animation-delay: -3.5s; animation-duration: 8.5s; }
+    .fruit-float:nth-child(9)  { bottom: 8%;  left: 7%;   font-size: 3.8rem; animation-delay: -2.5s; animation-duration: 7.2s; }
+    .fruit-float:nth-child(10) { bottom: 12%; right: 5%;  font-size: 2.8rem; animation-delay: -0.5s; animation-duration: 6.8s; }
+    .fruit-float:nth-child(11) { top: 18%;  left: 45%;  font-size: 2.5rem; animation-delay: -4.5s; animation-duration: 8.2s; opacity: 0.6; }
+    .fruit-float:nth-child(12) { top: 82%;  left: 55%;  font-size: 3rem;   animation-delay: -1.2s; animation-duration: 7.8s; opacity: 0.7; }
+    .fruit-float:nth-child(13) { top: 48%;  left: 40%;  font-size: 1.8rem; animation-delay: -5.5s; animation-duration: 6.2s; opacity: 0.8; }
+    .fruit-float:nth-child(14) { top: 10%;  right: 40%; font-size: 3.5rem; animation-delay: -3.2s; animation-duration: 7.1s; opacity: 0.5; filter: blur(1px); }
+
+    @keyframes float-fruit {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50%      { transform: translateY(-28px) rotate(5deg); }
+    }
+
+    /* ─── HEADER (Synced with index.html) ────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.6);
+    }
+    .header-inner {
+      max-width: 1000px; margin: 0 auto;
+      padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.7rem; line-height: 1;
+      background: linear-gradient(135deg, var(--teal-dk), var(--coral));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap; text-decoration: none;
+    }
+    nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font-size: .82rem; font-weight: 600; color: #4a6270;
+      text-decoration: none; padding: 6px 12px; border-radius: 99px;
+      transition: background .2s, color .2s;
+      letter-spacing: .02em;
+    }
+    .nav-link:hover { background: rgba(0,198,180,.1); color: var(--teal-dk); }
+    .nav-link.active { background: var(--teal-dk); color: white; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .lang-toggle { display: flex; background: rgba(0,0,0,.06); border-radius: 99px; padding: 3px; gap: 2px; }
+    .lang-btn {
+      width: 32px; height: 32px; border-radius: 99px; border: none;
+      background: transparent; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s; filter: grayscale(1); opacity: .55;
+    }
+    .lang-btn.active { background: white; filter: grayscale(0); opacity: 1; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .phone-pill {
+      display: flex; flex-direction: column; align-items: flex-end;
+      background: white; border: 1.5px solid rgba(0,198,180,.25);
+      border-radius: 99px; padding: 4px 14px; line-height: 1.25;
+    }
+    .phone-label { font-size: .58rem; font-weight: 600; color: #94a3b8; letter-spacing: .1em; text-transform: uppercase; }
+    .phone-num   { font-size: .8rem; font-weight: 700; color: var(--teal-dk); }
+    .nav-mobile-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
+
+    /* ─── MOBILE NAV MENU ───────────────────────── */
+    .mobile-nav {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(13,27,42,.97);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .mobile-nav.open { opacity: 1; pointer-events: all; }
+    .mobile-nav-link {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; font-style: italic;
+      color: rgba(255,255,255,.6); text-decoration: none;
+      transition: color .2s;
+    }
+    .mobile-nav-link:hover { color: var(--teal); }
+    .mobile-nav-close {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255,255,255,.1); border: none; border-radius: 99px;
+      width: 40px; height: 40px; color: white; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-nav-phone { margin-top: 20px; font-size: .9rem; color: var(--teal); font-weight: 700; }
+
+    /* ── HERO ────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 10;
+      max-width: 900px; margin: 0 auto;
+      padding: 36px 20px 20px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      background: var(--yellow); color: var(--ink);
+      font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 99px; margin-bottom: 14px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 8vw, 4.5rem);
+      font-weight: 900; line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .hero-title em { font-style: italic; color: var(--teal-dk); }
+    .hero-price-row {
+      display: inline-flex; align-items: baseline; gap: 6px;
+      background: white; border-radius: 99px;
+      padding: 10px 22px;
+      box-shadow: 0 8px 24px rgba(0,150,136,.18);
+      border: 2px solid rgba(0,198,180,.2);
+      margin-top: 4px;
+    }
+    .hero-price-text { font-size: .95rem; font-weight: 500; color: #64748b; }
+    .hero-price-val { font-size: 1.5rem; font-weight: 800; color: var(--coral); }
+
+    /* ── SECTION HEADER ──────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-tag {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      background: var(--teal); color: white;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .section-line { flex: 1; height: 1px; background: rgba(0,0,0,.08); }
+
+    /* ── PRODUCT GRID ────────────────────────────── */
+    main { position: relative; z-index: 10; max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    /* card */
+    .product-card {
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.07);
+      border: 1.5px solid rgba(255,255,255,.9);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+      display: flex; flex-direction: column;
+      cursor: default;
+    }
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 36px rgba(0,150,136,.17);
+    }
+
+    .card-visual {
+      height: 220px; width: 100%;
+      position: relative; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .card-image {
+      width: 100%;
+      height: 100%;
+      transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .product-card:hover .card-image { transform: scale(1.08); }
+    
+    .card-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--coral); color: white;
+      font-size: .6rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 99px;
+      box-shadow: 0 3px 10px rgba(255,107,107,.4);
+    }
+
+    .card-body { padding: 16px 18px 18px; flex: 1; display: flex; flex-direction: column; }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700; color: var(--ink);
+      margin-bottom: 6px; line-height: 1.25;
+    }
+    .card-desc { font-size: .82rem; color: #64748b; line-height: 1.55; flex: 1; margin-bottom: 16px; }
+    .card-desc .highlight { color: var(--coral); font-weight: 600; }
+
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 12px; border-top: 1px solid #f1f5f9;
+    }
+    .card-price { font-size: 1.15rem; font-weight: 800; color: var(--teal-dk); }
+
+    /* qty control */
+    .qty-control {
+      display: flex; align-items: center; gap: 2px;
+      background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: 99px; padding: 3px;
+      height: 38px;
+    }
+    .qty-btn {
+      width: 30px; height: 30px; border: none; border-radius: 99px;
+      font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; flex-shrink: 0; line-height: 1;
+    }
+    .qty-btn-minus { background: transparent; color: #94a3b8; }
+    .qty-btn-minus:hover:not(:disabled) { background: #ffe4e6; color: var(--coral); }
+    .qty-btn-plus { background: linear-gradient(135deg, var(--teal), var(--teal-dk)); color: white; box-shadow: 0 3px 10px rgba(0,150,136,.35); }
+    .qty-btn-plus:hover:not(:disabled) { transform: scale(1.1); }
+    .qty-num { width: 24px; text-align: center; font-weight: 800; font-size: .9rem; color: var(--ink); }
+
+    /* ── STICKY CART BAR ─────────────────────────── */
+    #cart-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      padding: 12px 16px 16px;
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #cart-bar.visible { transform: translateY(0); }
+    .cart-bar-inner {
+      max-width: 600px; margin: 0 auto;
+      background: var(--ink);
+      border-radius: 18px;
+      padding: 12px 14px 12px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 -4px 30px rgba(13,27,42,.3);
+    }
+    .cart-bar-left { display: flex; align-items: center; gap: 12px; }
+    .cart-icon-wrap { position: relative; }
+    .cart-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+    .cart-badge {
+      position: absolute; top: -5px; right: -5px;
+      background: var(--coral); color: white;
+      width: 18px; height: 18px; border-radius: 99px;
+      font-size: .65rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--ink);
+    }
+    .cart-label { font-size: .7rem; font-weight: 500; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .07em; }
+    .cart-total-val { font-size: 1.2rem; font-weight: 800; color: white; }
+    .checkout-btn {
+      background: var(--teal); color: white;
+      border: none; border-radius: 12px;
+      padding: 11px 20px; font-size: .85rem; font-weight: 700;
+      cursor: pointer; letter-spacing: .03em;
+      transition: background .2s, transform .15s;
+      white-space: nowrap; flex-shrink: 0;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .checkout-btn:hover { background: var(--teal-dk); transform: scale(1.03); }
+    .checkout-btn svg { width: 16px; height: 16px; }
+
+    /* ─── FOOTER (Synced with index.html) ────────── */
+    footer {
+      position: relative; z-index: 10;
+      background: rgba(13,27,42,.97);
+      color: rgba(255,255,255,.6);
+      padding: 40px 20px 120px;
+    }
+    .footer-inner { max-width: 1000px; margin: 0 auto; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 28px; margin-bottom: 32px; }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: block; margin-bottom: 8px;
+    }
+    .footer-brand-desc { font-size: .84rem; line-height: 1.65; max-width: 200px; }
+    .footer-links-title { font-size: .7rem; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-link { font-size: .88rem; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .footer-link:hover { color: var(--teal); }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,.08); margin-bottom: 20px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .footer-copy { font-size: .78rem; }
+    .footer-back-top {
+      font-size: .78rem; color: rgba(255,255,255,.4); text-decoration: none;
+      display: flex; align-items: center; gap: 5px; transition: color .2s;
+    }
+    .footer-back-top:hover { color: var(--teal); }
+
+    /* ── MODALS ──────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(13,27,42,.55);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    @media (min-width: 640px) {
+      .modal-overlay { align-items: center; }
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-sheet {
+      background: white;
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 500px; max-height: 92vh;
+      padding: 24px 20px 28px;
+      transform: translateY(40px);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    @media (min-width: 640px) {
+      .modal-sheet { border-radius: 24px; max-height: 88vh; margin: 16px; }
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 16px; flex-shrink: 0;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--ink);
+    }
+    .modal-close {
+      width: 34px; height: 34px; border: none; border-radius: 99px;
+      background: #f1f5f9; color: #64748b; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, color .2s;
+    }
+    .modal-close:hover { background: #ffe4e6; color: var(--coral); }
+    .modal-body { overflow-y: auto; flex: 1; }
+    .modal-body::-webkit-scrollbar { width: 4px; }
+    .modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+    /* review items */
+    .review-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid #f8fafc;
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-item-name { font-weight: 600; font-size: .9rem; color: var(--ink); }
+    .review-item-qty { font-size: .8rem; color: #94a3b8; }
+    .review-item-price { font-weight: 700; color: var(--teal-dk); font-size: .95rem; }
+
+    .total-row {
+      background: linear-gradient(135deg, #e0f7f5, #f0fdf4);
+      border-radius: 14px; padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 14px 0;
+    }
+    .total-label { font-weight: 600; color: var(--ink); }
+    .total-val { font-size: 1.5rem; font-weight: 900; color: var(--coral); }
+
+    /* form */
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block; font-size: .8rem; font-weight: 600;
+      color: var(--ink); margin-bottom: 6px;
+    }
+    .form-label .req { color: var(--coral); margin-left: 2px; }
+    .form-input, .form-textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px; font-family: inherit; font-size: .9rem;
+      color: var(--ink); background: #f8fafc; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,198,180,.15);
+      background: white;
+    }
+    .form-textarea { resize: vertical; min-height: 72px; }
+
+    /* primary btn */
+    .btn-primary {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dk));
+      color: white; font-weight: 700; font-size: 1rem; letter-spacing: .03em;
+      border: none; border-radius: 14px; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,150,136,.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,150,136,.4); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* success overlay */
+    #success-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: white;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 32px;
+    }
+    #success-overlay.show { display: flex; animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+    .success-emoji { font-size: 5rem; margin-bottom: 16px; animation: bounce 1s ease infinite alternate; }
+    @keyframes bounce { to { transform: translateY(-12px); } }
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 900; color: var(--teal-dk); margin-bottom: 10px;
+    }
+    .success-desc { color: #64748b; font-size: .95rem; margin-bottom: 28px; max-width: 300px; }
+    .btn-back {
+      padding: 13px 32px; background: var(--ink); color: white;
+      border: none; border-radius: 99px; font-weight: 700; font-size: .9rem;
+      cursor: pointer; letter-spacing: .04em; text-transform: uppercase;
+      transition: transform .2s;
+    }
+    .btn-back:hover { transform: scale(1.04); }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .nav-mobile-toggle { display: flex; }
+      .phone-pill { display: none; }
+      .footer-top { flex-direction: column; gap: 20px; }
+    }
+    @media (max-width: 480px) {
+      .hero { padding: 24px 16px 14px; }
+      .hero-title { font-size: 2.4rem; }
+      .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .card-visual { height: 160px; }
+      .card-body { padding: 12px 14px 14px; }
+      .card-name { font-size: .95rem; }
+      .card-desc { display: none; }
+      /* Hide some extra fruits on very small screens to avoid clutter */
+      .fruit-float:nth-child(n+10) { display: none; }
+    }
+    @media (max-width: 340px) {
+      .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div id="bg-canvas">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- FLOATING FRUITS (High Intensity) -->
+  <div class="bg-fruits" aria-hidden="true">
+    <span class="fruit-float">🍋</span>
+    <span class="fruit-float">🍉</span>
+    <span class="fruit-float">🍊</span>
+    <span class="fruit-float">🍍</span>
+    <span class="fruit-float">🍃</span>
+    <span class="fruit-float">🧊</span>
+    <span class="fruit-float">🍓</span>
+    <span class="fruit-float">🌿</span>
+    <span class="fruit-float">🥭</span>
+    <span class="fruit-float">🥝</span>
+    <span class="fruit-float">🍇</span>
+    <span class="fruit-float">🍑</span>
+    <span class="fruit-float">🫐</span>
+    <span class="fruit-float">🍈</span>
+  </div>
+</div>
+
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+  <a class="mobile-nav-link" href="index.html" data-i18n-link="navHome">Home</a>
+  <a class="mobile-nav-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+  <a class="mobile-nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+  <a class="mobile-nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+  <div class="mobile-nav-phone">📞 0936 558 097</div>
+</div>
+
+<!-- HEADER (Synced) -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="index.html">Bon's Tea</a>
+    <nav>
+      <a class="nav-link" href="index.html" data-i18n-link="navHome">Home</a>
+      <a class="nav-link active" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+      <a class="nav-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+      <a class="nav-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-lang-en" onclick="setLang('en')" title="English">🇬🇧</button>
+        <button class="lang-btn" id="btn-lang-ru" onclick="setLang('ru')" title="Русский">🇷🇺</button>
+      </div>
+      <div class="phone-pill">
+        <span class="phone-label" data-i18n="headerOrder">Order Now</span>
+        <span class="phone-num">0936 558 097</span>
+      </div>
+      <button class="nav-mobile-toggle" onclick="openMobileNav()" aria-label="Open menu">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="19" y2="6"/><line x1="3" y1="12" x2="19" y2="12"/><line x1="3" y1="18" x2="19" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-eyebrow" data-i18n="limitedOffer">Limited Time Offer</span>
+  <h2 class="hero-title" data-i18n-html="heroTitle">Fresh<br><em>Fruit Tea</em></h2>
+  <div class="hero-price-row">
+    <span class="hero-price-text" data-i18n="heroSubtitle">All flavors only</span>
+    <span class="hero-price-val">45K VND</span>
+  </div>
+</div>
+
+<!-- MAIN MENU -->
+<main>
+  <div class="section-header">
+    <span class="section-tag" data-i18n="menuTitle">Menu</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="product-grid" id="product-grid"><!-- rendered by JS --></div>
+</main>
+
+<!-- FOOTER (Synced) -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a class="footer-logo" href="index.html">Bon's Tea</a>
+        <p class="footer-brand-desc" data-i18n="footerDesc">Fresh tropical fruit teas, crafted daily in District 1, HCMC.</p>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerNavTitle">Pages</div>
+        <div class="footer-links">
+          <a class="footer-link" href="index.html" data-i18n-link="navHome">Home</a>
+          <a class="footer-link" href="order.html" data-i18n-link="navMenu">Menu & Order</a>
+          <a class="footer-link" href="gallery.html" data-i18n-link="navGallery">Gallery</a>
+          <a class="footer-link" href="contact.html" data-i18n-link="navContact">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-links-title" data-i18n="footerContactTitle">Contact</div>
+        <div class="footer-links">
+          <span class="footer-link">📞 0936 558 097</span>
+          <span class="footer-link" data-i18n="footerAddr">📍 123 Giải Khát St, D1</span>
+          <span class="footer-link" data-i18n="footerHours">⏰ 08:00 – 22:00 daily</span>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <span class="footer-copy" data-i18n="footerCopy">© 2025 Bon's Tea. All rights reserved.</span>
+      <a class="footer-back-top" href="#">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+        <span data-i18n="footerTop">Back to top</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<!-- STICKY CART BAR -->
+<div id="cart-bar">
+  <div class="cart-bar-inner">
+    <div class="cart-bar-left">
+      <div class="cart-icon-wrap">
+        <div class="cart-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/>
+          </svg>
+        </div>
+        <div class="cart-badge" id="cart-count">0</div>
+      </div>
+      <div>
+        <div class="cart-label" data-i18n="cartSubtotal">Subtotal</div>
+        <div class="cart-total-val" id="cart-total">0</div>
+      </div>
+    </div>
+    <button class="checkout-btn" id="checkout-btn">
+      <span data-i18n="btnContinue">Continue</span>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL 1: REVIEW CART -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="cartTitle">Your Cart</div>
+      <button class="modal-close" onclick="closeModal('review-modal')">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="review-items"></div>
+      <div class="total-row">
+        <span class="total-label" data-i18n="cartTotal">Total:</span>
+        <span class="total-val" id="review-total">0</span>
+      </div>
+      <button id="confirm-review-btn" class="btn-primary" data-i18n="btnConfirm">Confirm Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: CHECKOUT FORM -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="formTitle">🛵 Delivery Info</div>
+      <button class="modal-close" onclick="closeModal('checkout-modal')">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form action="https://docs.google.com/forms/d/e/1FAIpQLSd2obDIxpqNsD-DI6Y7U95y7b5kYeHUiCe3egKDAZEqFGpe5g/formResponse"
+            method="POST" target="hidden_iframe" id="order-form" onsubmit="handleFormSubmit();">
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="lblName">Your Name</span><span class="req">*</span></label>
+          <input type="text" name="entry.1584277093" required class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="lblPhone">Phone / WhatsApp</span><span class="req">*</span></label>
+          <input type="text" name="entry.1910847976" required class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="lblAddress">Address (Hotel / Room)</span><span class="req">*</span></label>
+          <input type="text" name="entry.75177064" required class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblNote">Notes (Ice/Sugar...)</label>
+          <textarea name="entry.529463192" rows="2" class="form-textarea"></textarea>
+        </div>
+        <input type="hidden" id="cart-details-input" name="entry.1598342996" value="" />
+        <input type="hidden" id="total-amount-input" name="entry.287285291" value="" />
+        <button type="submit" class="btn-primary" data-i18n="btnSubmit">Complete Order 🍹</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="success-overlay">
+  <div class="success-emoji">🎉🍹</div>
+  <div class="success-title" data-i18n="successTitle">Order Successful!</div>
+  <div class="success-desc" data-i18n="successDesc">Bon's Tea has received your order!</div>
+  <button class="btn-back" onclick="location.reload()" data-i18n="btnBack">Back to Menu</button>
+</div>
+
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none" onload="if(window.submitted){showSubmissionSuccess();}"></iframe>
+
+<script>
+  let submitted = false;
+  const DEFAULT_PRICE = 45000;
+  let cart = {};
+  let currentLang = 'en';
+
+  /* ── Synced Translations for Header, Footer & Main functions ── */
+  const translations = {
+    en: {
+      orderNow: "ORDER NOW",
+      heroTitle: "Fresh<br><em>Fruit Tea</em>",
+      heroSubtitle: "All flavors only",
+      limitedOffer: "☀️ Limited Time Offer",
+      menuTitle: "Our Menu",
+      cartSubtotal: "Subtotal",
+      btnContinue: "Continue",
+      cartTitle: "Your Cart",
+      cartTotal: "Total:",
+      btnConfirm: "Confirm Order",
+      formTitle: "🛵 Delivery Info",
+      lblName: "Your Name",
+      lblPhone: "Phone / WhatsApp",
+      lblAddress: "Address (Hotel / Room number)",
+      lblNote: "Notes (Ice / Sugar / Pearls...)",
+      btnSubmit: "Complete Order 🍹",
+      emptyCart: "No items selected.",
+      successTitle: "Order Placed!",
+      successDesc: "Bon's Tea has received your order and will prepare it right away.",
+      btnBack: "Back to Menu",
+      /* Sync keys */
+      headerOrder: "Order Now",
+      footerDesc: "Fresh tropical fruit teas, crafted daily in District 1, HCMC.",
+      footerNavTitle: "Pages", 
+      footerContactTitle: "Contact",
+      footerAddr: "📍 123 Giải Khát St, D1", 
+      footerHours: "⏰ 08:00 – 22:00 daily",
+      footerCopy: "© 2025 Bon's Tea. All rights reserved.", 
+      footerTop: "Back to top",
+      navHome: "Home", 
+      navMenu: "Menu & Order", 
+      navGallery: "Gallery", 
+      navContact: "Contact"
+    },
+    ru: {
+      orderNow: "ЗАКАЗАТЬ",
+      heroTitle: "Свежий<br><em>Фруктовый Чай</em>",
+      heroSubtitle: "Все вкусы всего",
+      limitedOffer: "☀️ Ограниченное предложение",
+      menuTitle: "Наше Меню",
+      cartSubtotal: "Итого",
+      btnContinue: "Далее",
+      cartTitle: "Ваша Корзина",
+      cartTotal: "Сумма:",
+      btnConfirm: "Подтвердить заказ",
+      formTitle: "🛵 Данные доставки",
+      lblName: "Ваше Имя",
+      lblPhone: "Телефон / WhatsApp",
+      lblAddress: "Адрес (Отель / Номер комнаты)",
+      lblNote: "Примечания (Лёд / Сахар...)",
+      btnSubmit: "Завершить заказ 🍹",
+      emptyCart: "Товары не выбраны.",
+      successTitle: "Заказ принят!",
+      successDesc: "Bon's Tea получил ваш заказ и скоро его приготовит.",
+      btnBack: "Вернуться в меню",
+      /* Sync keys */
+      headerOrder: "Заказать",
+      footerDesc: "Свежие тропические фруктовые чаи, каждый день в Районе 1, Хошимин.",
+      footerNavTitle: "Страницы", 
+      footerContactTitle: "Контакты",
+      footerAddr: "📍 ул. Гяй Хат 123, Район 1", 
+      footerHours: "⏰ 08:00 – 22:00 ежедневно",
+      footerCopy: "© 2025 Bon's Tea. Все права защищены.", 
+      footerTop: "Наверх",
+      navHome: "Главная", 
+      navMenu: "Меню и заказ", 
+      navGallery: "Галерея", 
+      navContact: "Контакты"
+    }
+  };
+
+  const products = [
+    {
+      id: "p1", color: "#d4f7f2", image: "01.png",
+      name: { en: "Pineapple Mint Tea", ru: "Ананасово-Мятный Чай" },
+      desc: {
+        en: "Pineapple + mint + pandan tea.<br><span class='highlight'>👉 Super fresh & cooling</span>",
+        ru: "Ананас + мята + чай пандан.<br><span class='highlight'>👉 Охлаждающий вкус</span>"
+      }
+    },
+    {
+      id: "p2", color: "#fde8d8", image: "02.png",
+      name: { en: "Passion Orange Tea", ru: "Маракуйя Апельсин" },
+      desc: {
+        en: "Passion fruit + orange + tea.<br><span class='highlight'>👉 Sweet & sour – most popular</span>",
+        ru: "Маракуйя + апельсин + чай.<br><span class='highlight'>👉 Самый популярный</span>"
+      }
+    },
+    {
+      id: "p3", color: "#fde8f0", image: "03.png",
+      name: { en: "Watermelon Lime Tea", ru: "Арбузный Лайм Чай" },
+      desc: {
+        en: "Watermelon + lime + tea.<br><span class='highlight'>👉 Light & refreshing</span>",
+        ru: "Арбуз + лайм + чай.<br><span class='highlight'>👉 Лёгкий и освежающий</span>"
+      }
+    }
+  ];
+
+  /* ── Lang ── */
+  window.setLang = function(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-lang-' + lang).classList.add('active');
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (translations[lang][k]) el.textContent = translations[lang][k];
+    });
+    
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const k = el.getAttribute('data-i18n-html');
+      if (translations[lang][k]) el.innerHTML = translations[lang][k];
+    });
+
+    // Handle nav links synchronized updates
+    document.querySelectorAll('[data-i18n-link]').forEach(el => {
+      const k = el.getAttribute('data-i18n-link');
+      if (translations[lang][k] !== undefined) el.textContent = translations[lang][k];
+    });
+
+    renderMenu();
+    updateCartUI();
+    if (document.getElementById('review-modal').classList.contains('open')) renderReviewItems();
+  };
+
+  /* ── Currency ── */
+  function fmt(n) { return n.toLocaleString('en-US') + ' VND'; }
+
+  /* ── Render Menu ── */
+  function renderMenu() {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+    products.forEach(item => {
+      const qty = cart[item.id] ? cart[item.id].quantity : 0;
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.id = 'item-' + item.id;
+      card.innerHTML = `
+        <div class="card-visual" style="background:${item.color};">
+          <div class="card-image"><img src="${item.image}" alt="${item.name[currentLang]}"></div>
+          <div class="card-badge">HOT</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${item.name[currentLang]}</div>
+          <div class="card-desc">${item.desc[currentLang]}</div>
+          <div class="card-footer">
+            <div class="card-price">${fmt(DEFAULT_PRICE)}</div>
+            <div class="qty-control">
+              <button class="qty-btn qty-btn-minus" onclick="updateCart('${item.id}',-1)">−</button>
+              <span class="qty-num" id="qty-${item.id}">${qty}</span>
+              <button class="qty-btn qty-btn-plus" onclick="updateCart('${item.id}',1)">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  /* ── Cart ── */
+  window.updateCart = function(id, delta) {
+    if (!cart[id]) cart[id] = { quantity: 0, price: DEFAULT_PRICE };
+    cart[id].quantity += delta;
+    if (cart[id].quantity <= 0) delete cart[id];
+    const el = document.getElementById('qty-' + id);
+    if (el) el.textContent = cart[id] ? cart[id].quantity : 0;
+    updateCartUI();
+  };
+
+  function updateCartUI() {
+    let total = 0, count = 0;
+    for (const id in cart) { count += cart[id].quantity; total += cart[id].quantity * cart[id].price; }
+    document.getElementById('cart-count').textContent = count;
+    document.getElementById('cart-total').textContent = fmt(total);
+    const bar = document.getElementById('cart-bar');
+    if (count > 0) bar.classList.add('visible');
+    else bar.classList.remove('visible');
+  }
+
+  function renderReviewItems() {
+    let html = '', total = 0;
+    const container = document.getElementById('review-items');
+    if (!Object.keys(cart).length) {
+      container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px 0;">${translations[currentLang].emptyCart}</p>`;
+      return 0;
+    }
+    for (const id in cart) {
+      const d = cart[id];
+      const p = products.find(x => x.id === id);
+      const sub = d.quantity * d.price;
+      total += sub;
+      html += `<div class="review-row">
+        <div><div class="review-item-name">${p.name[currentLang]}</div><div class="review-item-qty">x${d.quantity}</div></div>
+        <div class="review-item-price">${fmt(sub)}</div>
+      </div>`;
+    }
+    container.innerHTML = html;
+    document.getElementById('review-total').textContent = fmt(total);
+    return total;
+  }
+
+  /* ── Modals ── */
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  window.closeModal = function(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* ── Form Submit ── */
+  window.handleFormSubmit = function() {
+    const total = renderReviewItems();
+    const items = Object.keys(cart).map(id => {
+      const p = products.find(x => x.id === id);
+      return `${p.name['en']} (Qty: ${cart[id].quantity})`;
+    }).join(' | ');
+    document.getElementById('cart-details-input').value = items;
+    document.getElementById('total-amount-input').value = fmt(Object.values(cart).reduce((s,v)=>s+v.quantity*v.price,0));
+    window.submitted = true;
+  };
+
+  window.showSubmissionSuccess = function() {
+    if (!window.submitted) return;
+    closeModal('checkout-modal');
+    const overlay = document.getElementById('success-overlay');
+    overlay.classList.add('show');
+    // update i18n on success screen
+    overlay.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (translations[currentLang][k]) el.textContent = translations[currentLang][k];
+    });
+  };
+
+  /* ─── MOBILE NAV FUNCTIONS (Synced) ────────────── */
+  window.openMobileNav  = () => document.getElementById('mobile-nav').classList.add('open');
+  window.closeMobileNav = () => document.getElementById('mobile-nav').classList.remove('open');
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    setLang('en');
+
+    document.getElementById('checkout-btn').addEventListener('click', () => {
+      renderReviewItems();
+      openModal('review-modal');
+    });
+
+    document.getElementById('confirm-review-btn').addEventListener('click', () => {
+      closeModal('review-modal');
+      setTimeout(() => openModal('checkout-modal'), 300);
+    });
+
+    // Close on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+    });
+  });
+</script>
+</body>
+</html>
