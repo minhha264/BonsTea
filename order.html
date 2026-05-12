@@ -503,6 +503,24 @@
       .card-body { padding: 12px 14px 14px; }
       .card-name { font-size: .95rem; }
       .card-desc { display: none; }
+      
+      /* --- Sửa lỗi khuất nút Add (+) --- */
+      .card-footer {
+        flex-direction: column;  /* Chuyển Giá và Nút thành xếp dọc */
+        align-items: stretch;    /* Kéo dài để full chiều ngang */
+        gap: 10px;
+      }
+      .card-price {
+        text-align: center;
+        font-size: 1.05rem;
+      }
+      .qty-control {
+        width: 100%;             /* Chiếm toàn bộ không gian ngang */
+        justify-content: space-between; /* Đẩy nút - và + ra 2 mép */
+        padding: 3px 6px;        /* Tăng nhẹ padding 2 bên cho cân đối */
+      }
+      /* --------------------------------- */
+
       /* Hide some extra fruits on very small screens to avoid clutter */
       .fruit-float:nth-child(n+10) { display: none; }
     }
