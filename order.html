@@ -30,26 +30,18 @@
     }
 
     /* ── BACKGROUND ──────────────────────────────── */
-#bg-canvas {
-  position: fixed; 
-  inset: -20px; /* Cố tình làm to hơn màn hình một chút để khi blur không bị viền trắng */
-  z-index: 0;
-  
-  /* Thay url ảnh của bạn vào đây */
-  background-image: url('bg.png'); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  
-  /* Tạo độ mờ cho ảnh (tăng giảm tuỳ ý từ 10px đến 30px) */
-  filter: blur(2px);
-  
-  /* Thêm một lớp màu trắng mờ phủ lên trên để đảm bảo chữ màu đen (var(--ink)) luôn dễ đọc */
-  /* Nếu ảnh tạo ra quá sáng, có thể bỏ dòng này đi */
-  box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
-}
+    #bg-canvas {
+      position: fixed; 
+      inset: -20px;
+      z-index: 0;
+      background-image: url('bg.png'); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(2px);
+      box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.3);
+    }
 
-/* Nếu bạn dùng ảnh, bạn có thể xoá các thẻ <div class="blob"> đi vì ảnh đã loang màu sẵn rồi */
     .blob {
       position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45;
       animation: drift 18s ease-in-out infinite alternate;
@@ -71,7 +63,6 @@
       user-select: none;
       opacity: 0.85;
     }
-    /* 14 scattered fruits with varying properties */
     .fruit-float:nth-child(1)  { top: 6%;   left: 5%;   font-size: 3rem;   animation-delay: 0s;    animation-duration: 7s; }
     .fruit-float:nth-child(2)  { top: 12%;  right: 7%;  font-size: 4rem;   animation-delay: -2s;   animation-duration: 6s; }
     .fruit-float:nth-child(3)  { top: 22%;  left: -2%;  font-size: 4.5rem; animation-delay: -4s;   animation-duration: 8s; opacity: 0.4; filter: blur(3px); }
@@ -92,7 +83,7 @@
       50%      { transform: translateY(-28px) rotate(5deg); }
     }
 
-    /* ─── HEADER (Synced with index.html) ────────── */
+    /* ─── HEADER ────────── */
     header {
       position: sticky; top: 0; z-index: 100;
       background: var(--glass);
@@ -214,7 +205,6 @@
       gap: 18px;
     }
 
-    /* card */
     .product-card {
       background: white;
       border-radius: var(--radius);
@@ -271,7 +261,6 @@
     }
     .card-price { font-size: 1.15rem; font-weight: 800; color: var(--teal-dk); }
 
-    /* qty control */
     .qty-control {
       display: flex; align-items: center; gap: 2px;
       background: #f8fafc; border: 1.5px solid #e2e8f0;
@@ -336,7 +325,7 @@
     .checkout-btn:hover { background: var(--teal-dk); transform: scale(1.03); }
     .checkout-btn svg { width: 16px; height: 16px; }
 
-    /* ─── FOOTER (Synced with index.html) ────────── */
+    /* ─── FOOTER ───────────────────────── */
     footer {
       position: relative; z-index: 10;
       background: rgba(13,27,42,.97);
@@ -462,6 +451,7 @@
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,150,136,.4); }
     .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
     /* success overlay */
     #success-overlay {
@@ -504,10 +494,9 @@
       .card-name { font-size: .95rem; }
       .card-desc { display: none; }
       
-      /* --- Sửa lỗi khuất nút Add (+) --- */
       .card-footer {
-        flex-direction: column;  /* Chuyển Giá và Nút thành xếp dọc */
-        align-items: stretch;    /* Kéo dài để full chiều ngang */
+        flex-direction: column;
+        align-items: stretch;
         gap: 10px;
       }
       .card-price {
@@ -515,13 +504,10 @@
         font-size: 1.05rem;
       }
       .qty-control {
-        width: 100%;             /* Chiếm toàn bộ không gian ngang */
-        justify-content: space-between; /* Đẩy nút - và + ra 2 mép */
-        padding: 3px 6px;        /* Tăng nhẹ padding 2 bên cho cân đối */
+        width: 100%;
+        justify-content: space-between;
+        padding: 3px 6px;
       }
-      /* --------------------------------- */
-
-      /* Hide some extra fruits on very small screens to avoid clutter */
       .fruit-float:nth-child(n+10) { display: none; }
     }
     @media (max-width: 340px) {
@@ -537,7 +523,6 @@
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
 
-  <!-- FLOATING FRUITS (High Intensity) -->
   <div class="bg-fruits" aria-hidden="true">
     <span class="fruit-float">🍋</span>
     <span class="fruit-float">🍉</span>
@@ -613,7 +598,7 @@
   <div class="product-grid" id="product-grid"><!-- rendered by JS --></div>
 </main>
 
-<!-- FOOTER (Synced) -->
+<!-- FOOTER -->
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
@@ -706,8 +691,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <form action="https://docs.google.com/forms/d/e/1FAIpQLSd2obDIxpqNsD-DI6Y7U95y7b5kYeHUiCe3egKDAZEqFGpe5g/formResponse"
-            method="POST" target="hidden_iframe" id="order-form" onsubmit="handleFormSubmit();">
+      <form id="order-form">
         <div class="form-group">
           <label class="form-label"><span data-i18n="lblName">Your Name</span><span class="req">*</span></label>
           <input type="text" name="entry.1584277093" required class="form-input" />
@@ -724,8 +708,6 @@
           <label class="form-label" data-i18n="lblNote">Notes (Ice/Sugar...)</label>
           <textarea name="entry.529463192" rows="2" class="form-textarea"></textarea>
         </div>
-        <input type="hidden" id="cart-details-input" name="entry.1598342996" value="" />
-        <input type="hidden" id="total-amount-input" name="entry.287285291" value="" />
         <button type="submit" class="btn-primary" data-i18n="btnSubmit">Complete Order 🍹</button>
       </form>
     </div>
@@ -740,12 +722,11 @@
   <button class="btn-back" onclick="location.reload()" data-i18n="btnBack">Back to Menu</button>
 </div>
 
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none" onload="if(window.submitted){showSubmissionSuccess();}"></iframe>
 
 <script>
   let submitted = false;
   const DEFAULT_PRICE = 45000;
-  let cart = {};
+  window.cart = {};
   let currentLang = 'en';
 
   /* ── Synced Translations for Header, Footer & Main functions ── */
@@ -771,7 +752,6 @@
       successTitle: "Order Placed!",
       successDesc: "Bon's Tea has received your order and will prepare it right away.",
       btnBack: "Back to Menu",
-      /* Sync keys */
       headerOrder: "Order Now",
       footerDesc: "Fresh tropical fruit teas, crafted daily in District 1, HCMC.",
       footerNavTitle: "Pages", 
@@ -806,7 +786,6 @@
       successTitle: "Заказ принят!",
       successDesc: "Bon's Tea получил ваш заказ и скоро его приготовит.",
       btnBack: "Вернуться в меню",
-      /* Sync keys */
       headerOrder: "Заказать",
       footerDesc: "Свежие тропические фруктовые чаи, каждый день в Районе 1, Хошимин.",
       footerNavTitle: "Страницы", 
@@ -822,7 +801,7 @@
     }
   };
 
-  const products = [
+  window.products = [
     {
       id: "p1", color: "#d4f7f2", image: "01.png",
       name: { en: "Pineapple Mint Tea", ru: "Ананасово-Мятный Чай" },
@@ -865,7 +844,6 @@
       if (translations[lang][k]) el.innerHTML = translations[lang][k];
     });
 
-    // Handle nav links synchronized updates
     document.querySelectorAll('[data-i18n-link]').forEach(el => {
       const k = el.getAttribute('data-i18n-link');
       if (translations[lang][k] !== undefined) el.textContent = translations[lang][k];
@@ -873,18 +851,16 @@
 
     renderMenu();
     updateCartUI();
-    if (document.getElementById('review-modal').classList.contains('open')) renderReviewItems();
+    if (document.getElementById('review-modal').classList.contains('open')) window.renderReviewItems();
   };
 
-  /* ── Currency ── */
   function fmt(n) { return n.toLocaleString('en-US') + ' VND'; }
 
-  /* ── Render Menu ── */
   function renderMenu() {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
-    products.forEach(item => {
-      const qty = cart[item.id] ? cart[item.id].quantity : 0;
+    window.products.forEach(item => {
+      const qty = window.cart[item.id] ? window.cart[item.id].quantity : 0;
       const card = document.createElement('div');
       card.className = 'product-card';
       card.id = 'item-' + item.id;
@@ -910,19 +886,18 @@
     });
   }
 
-  /* ── Cart ── */
   window.updateCart = function(id, delta) {
-    if (!cart[id]) cart[id] = { quantity: 0, price: DEFAULT_PRICE };
-    cart[id].quantity += delta;
-    if (cart[id].quantity <= 0) delete cart[id];
+    if (!window.cart[id]) window.cart[id] = { quantity: 0, price: DEFAULT_PRICE };
+    window.cart[id].quantity += delta;
+    if (window.cart[id].quantity <= 0) delete window.cart[id];
     const el = document.getElementById('qty-' + id);
-    if (el) el.textContent = cart[id] ? cart[id].quantity : 0;
+    if (el) el.textContent = window.cart[id] ? window.cart[id].quantity : 0;
     updateCartUI();
   };
 
   function updateCartUI() {
     let total = 0, count = 0;
-    for (const id in cart) { count += cart[id].quantity; total += cart[id].quantity * cart[id].price; }
+    for (const id in window.cart) { count += window.cart[id].quantity; total += window.cart[id].quantity * window.cart[id].price; }
     document.getElementById('cart-count').textContent = count;
     document.getElementById('cart-total').textContent = fmt(total);
     const bar = document.getElementById('cart-bar');
@@ -930,16 +905,16 @@
     else bar.classList.remove('visible');
   }
 
-  function renderReviewItems() {
+  window.renderReviewItems = function() {
     let html = '', total = 0;
     const container = document.getElementById('review-items');
-    if (!Object.keys(cart).length) {
+    if (!Object.keys(window.cart).length) {
       container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px 0;">${translations[currentLang].emptyCart}</p>`;
       return 0;
     }
-    for (const id in cart) {
-      const d = cart[id];
-      const p = products.find(x => x.id === id);
+    for (const id in window.cart) {
+      const d = window.cart[id];
+      const p = window.products.find(x => x.id === id);
       const sub = d.quantity * d.price;
       total += sub;
       html += `<div class="review-row">
@@ -950,9 +925,8 @@
     container.innerHTML = html;
     document.getElementById('review-total').textContent = fmt(total);
     return total;
-  }
+  };
 
-  /* ── Modals ── */
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -962,40 +936,24 @@
     document.body.style.overflow = '';
   };
 
-  /* ── Form Submit ── */
-  window.handleFormSubmit = function() {
-    const total = renderReviewItems();
-    const items = Object.keys(cart).map(id => {
-      const p = products.find(x => x.id === id);
-      return `${p.name['en']} (Qty: ${cart[id].quantity})`;
-    }).join(' | ');
-    document.getElementById('cart-details-input').value = items;
-    document.getElementById('total-amount-input').value = fmt(Object.values(cart).reduce((s,v)=>s+v.quantity*v.price,0));
-    window.submitted = true;
-  };
-
   window.showSubmissionSuccess = function() {
-    if (!window.submitted) return;
     closeModal('checkout-modal');
     const overlay = document.getElementById('success-overlay');
     overlay.classList.add('show');
-    // update i18n on success screen
     overlay.querySelectorAll('[data-i18n]').forEach(el => {
       const k = el.getAttribute('data-i18n');
       if (translations[currentLang][k]) el.textContent = translations[currentLang][k];
     });
   };
 
-  /* ─── MOBILE NAV FUNCTIONS (Synced) ────────────── */
   window.openMobileNav  = () => document.getElementById('mobile-nav').classList.add('open');
   window.closeMobileNav = () => document.getElementById('mobile-nav').classList.remove('open');
 
-  /* ── Init ── */
   document.addEventListener('DOMContentLoaded', () => {
     setLang('en');
 
     document.getElementById('checkout-btn').addEventListener('click', () => {
-      renderReviewItems();
+      window.renderReviewItems();
       openModal('review-modal');
     });
 
@@ -1004,11 +962,95 @@
       setTimeout(() => openModal('checkout-modal'), 300);
     });
 
-    // Close on backdrop click
     document.querySelectorAll('.modal-overlay').forEach(m => {
       m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
     });
   });
 </script>
+
+<!-- FIREBASE INTEGRATION SCRIPT -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+  // Thông số cấu hình Firebase của bạn
+  const firebaseConfig = {
+    apiKey: "AIzaSyAcnysK7mnyRDHirN7K29uuyZtUjmg3uNU",
+    authDomain: "bonstea-d0e2c.firebaseapp.com",
+    projectId: "bonstea-d0e2c",
+    storageBucket: "bonstea-d0e2c.firebasestorage.app",
+    messagingSenderId: "120865795098",
+    appId: "1:120865795098:web:807507c33b392f71a575a3",
+    measurementId: "G-FJZPDTBK3E"
+  };
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const myAppId = 'bonstea_app';
+
+  // Đăng nhập ẩn danh để lưu đơn hàng
+  signInAnonymously(auth).catch(console.error);
+
+  // Lắng nghe sự kiện Submit Form
+  document.getElementById('order-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = document.querySelector('#order-form button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Processing...';
+    submitBtn.disabled = true;
+
+    // Lấy thông tin giỏ hàng
+    const items = Object.keys(window.cart).map(id => {
+      const p = window.products.find(x => x.id === id);
+      return `${p.name['en']} (Qty: ${window.cart[id].quantity})`;
+    }).join(' | ');
+    const totalAmt = Object.values(window.cart).reduce((s,v) => s + v.quantity * v.price, 0);
+
+    // Lấy thông tin khách hàng
+    const name = document.querySelector('input[name="entry.1584277093"]').value;
+    const phone = document.querySelector('input[name="entry.1910847976"]').value;
+    const address = document.querySelector('input[name="entry.75177064"]').value;
+    const notes = document.querySelector('textarea[name="entry.529463192"]').value;
+
+    try {
+      // Đẩy dữ liệu lên Firebase Firestore
+      const ordersRef = collection(db, 'artifacts', myAppId, 'public', 'data', 'bonstea_orders');
+      await addDoc(ordersRef, {
+        customerName: name,
+        phone: phone,
+        address: address,
+        items: items,
+        totalAmount: totalAmt,
+        notes: notes,
+        status: 'pending', // Đơn mới luôn ở trạng thái chờ duyệt
+        createdAt: serverTimestamp()
+      });
+      
+      // Thành công
+      window.showSubmissionSuccess();
+      
+      // Xóa giỏ hàng
+      window.cart = {};
+      const els = document.querySelectorAll('.qty-num');
+      els.forEach(el => el.textContent = '0');
+      document.getElementById('cart-count').textContent = '0';
+      document.getElementById('cart-total').textContent = '0 VND';
+      document.getElementById('cart-bar').classList.remove('visible');
+      document.getElementById('order-form').reset();
+
+    } catch (error) {
+      console.error("Lỗi đặt hàng:", error);
+      alert("Oops! Có lỗi kết nối. Vui lòng thử lại.");
+    } finally {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>

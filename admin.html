@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bon's Tea | Admin Pro Dashboard</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f766e;
+            --primary-light: #ccfbf1;
+            --primary-dark: #115e59;
+            --bg-sidebar: rgba(15, 23, 42, 0.85); /* Slightly transparent slate-900 */
+            --text-sidebar: #94a3b8;
+            --text-sidebar-hover: #f8fafc;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1e293b; background-color: #f0faf9; }
+        .logo-font { font-family: 'Lora', serif; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ── BLURRY BACKGROUND ── */
+        #bg-canvas {
+            position: fixed; inset: 0; z-index: -1; overflow: hidden;
+            background-color: #f0faf9; /* Match order.html mist background */
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
+            animation: drift 20s ease-in-out infinite alternate; pointer-events: none;
+        }
+        .blob-1 { width: 600px; height: 600px; background: #ccfbf1; top: -150px; left: -150px; animation-delay: 0s; }
+        .blob-2 { width: 500px; height: 500px; background: #e0f2fe; bottom: 10%; right: -100px; animation-delay: -5s; }
+        .blob-3 { width: 450px; height: 450px; background: #fef08a; bottom: -50px; left: 20%; animation-delay: -10s; opacity: 0.3; }
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(40px, 30px) scale(1.1); }
+        }
+
+        /* ── SIDEBAR ── */
+        #sidebar { 
+            transition: transform 0.3s ease-in-out; 
+            background: var(--bg-sidebar); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .nav-item { 
+            border-radius: 8px; margin: 4px 16px; padding: 10px 16px; 
+            color: var(--text-sidebar); transition: all 0.2s; 
+            font-weight: 500; display: flex; align-items: center; gap: 12px;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--text-sidebar-hover); }
+        .nav-item.active { 
+            background: var(--primary); color: white; 
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+        }
+        .nav-item i { font-size: 1.25rem; }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── GLASS CARDS ── */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .glass-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.06); transform: translateY(-2px); }
+        
+        .kpi-card { position: relative; overflow: hidden; }
+        .kpi-icon-bg { position: absolute; right: -15px; top: -15px; font-size: 100px; opacity: 0.05; }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; font-weight: 600; padding: 8px 16px; border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+            border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(15, 118, 110, 0.2);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(15, 118, 110, 0.3); }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.8); border: 1px solid #cbd5e1; color: #475569;
+            backdrop-filter: blur(8px);
+            font-weight: 600; padding: 8px 16px; border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: #ffffff; border-color: #94a3b8; }
+
+        .form-input { 
+            width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; 
+            border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: #fff;}
+
+        .pro-table th { 
+            background: rgba(248, 250, 252, 0.6); color: #64748b; font-size: 12px; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 0.05em; padding: 16px; border-bottom: 2px solid #e2e8f0;
+        }
+        .pro-table td { padding: 16px; border-bottom: 1px solid rgba(241, 245, 249, 0.5); vertical-align: middle; font-size: 14px; }
+        .pro-table tr:hover td { background: rgba(248, 250, 252, 0.8); }
+
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-pending { background: #fff7ed; color: #ea580c; }
+        .badge-processing { background: #eff6ff; color: #2563eb; }
+        .badge-completed { background: #f0fdf4; color: #16a34a; }
+        .badge-cancelled { background: #fef2f2; color: #dc2626; }
+
+        /* ── CHAT ── */
+        .chat-container { display: flex; flex-direction: column; height: 600px; max-height: 70vh; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: rgba(248, 250, 252, 0.5); }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+        .message.user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .message.ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .chat-input-area { padding: 16px; background: rgba(255, 255, 255, 0.8); border-top: 1px solid rgba(226, 232, 240, 0.6); display: flex; gap: 10px; }
+        
+        .message.ai p { margin-bottom: 8px; }
+        .message.ai p:last-child { margin-bottom: 0; }
+        .message.ai strong { color: #0f172a; font-weight: 700; }
+        .message.ai ul { margin-left: 20px; list-style-type: disc; margin-bottom: 8px; }
+        .message.ai table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        .message.ai th, .message.ai td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: left; }
+        .message.ai th { background: #f8fafc; }
+
+        .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; background: white; border-radius: 12px; align-self: flex-start; border: 1px solid #e2e8f0;}
+        .typing-dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        #toast { position: fixed; top: 20px; right: -400px; transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; }
+        #toast.show { right: 20px; }
+
+        @media(max-width: 768px) {
+            #sidebar { position: fixed; z-index: 50; height: 100%; top: 0; left: 0; transform: translateX(-100%); width: 260px; }
+            #sidebar.open { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+<!-- Blurry Gradient Background -->
+<div id="bg-canvas">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div id="overlay" onclick="closeSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden backdrop-blur-sm"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col h-full md:relative text-sm">
+    <div class="h-20 flex items-center px-6 border-b border-slate-700/50">
+        <div class="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-teal-500/30">
+            <i class="ph ph-leaf text-2xl"></i>
+        </div>
+        <div>
+            <h1 class="logo-font italic font-bold text-xl text-white tracking-wide">Bon's Tea</h1>
+            <p class="text-[10px] uppercase tracking-widest text-teal-400 font-bold">Admin Pro</p>
+        </div>
+    </div>
+
+    <nav class="flex-1 py-6 overflow-y-auto">
+        <p class="px-6 mb-2 text-[11px] text-slate-400 font-bold uppercase tracking-widest">Dashboard</p>
+        <button onclick="switchTab('dashboard')" class="nav-item active w-full" data-tab="dashboard">
+            <i class="ph ph-squares-four"></i> Tổng quan
+        </button>
+        <button onclick="switchTab('analytics')" class="nav-item w-full" data-tab="analytics">
+            <i class="ph ph-chart-line-up"></i> Báo cáo doanh thu
+        </button>
+        <button onclick="switchTab('customers')" class="nav-item w-full" data-tab="customers">
+            <i class="ph ph-users"></i> Khách hàng CRM
+        </button>
+        
+        <p class="px-6 mt-6 mb-2 text-[11px] text-slate-400 font-bold uppercase tracking-widest">Quản lý</p>
+        <button onclick="switchTab('orders')" class="nav-item w-full relative" data-tab="orders">
+            <i class="ph ph-receipt"></i> Đơn hàng
+            <span id="nav-badge" class="absolute right-4 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+        </button>
+        <button onclick="switchTab('products')" class="nav-item w-full" data-tab="products">
+            <i class="ph ph-coffee"></i> Menu Sản phẩm
+        </button>
+
+        <p class="px-6 mt-6 mb-2 text-[11px] text-slate-400 font-bold uppercase tracking-widest">Thông minh</p>
+        <button onclick="switchTab('ai-chat')" class="nav-item w-full bg-gradient-to-r hover:from-indigo-800 hover:to-slate-800 border border-indigo-500/30 text-indigo-300" data-tab="ai-chat">
+            <i class="ph ph-sparkle text-indigo-400"></i> Trợ lý AI Pro
+        </button>
+    </nav>
+
+    <div class="p-4 border-t border-slate-700/50">
+        <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl hover:bg-slate-700/80 cursor-pointer transition-colors">
+            <img src="https://ui-avatars.com/api/?name=Admin+Bon&background=0D8B94&color=fff" class="w-10 h-10 rounded-full" alt="Avatar">
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-white truncate">Chủ Quán</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <p class="text-xs text-slate-300">Đang hoạt động</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="flex-1 h-full overflow-y-auto relative z-10">
+    
+    <div class="md:hidden sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 h-16 flex items-center justify-between px-4 z-30 shadow-sm">
+        <button onclick="openSidebar()" class="text-slate-600 text-2xl p-2"><i class="ph ph-list"></i></button>
+        <h1 class="logo-font italic font-bold text-xl text-teal-700">Bon's Tea</h1>
+        <div class="w-10"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DASHBOARD                           -->
+        <!-- ========================================== -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Tổng quan hôm nay</h2>
+                    <p class="text-slate-500 mt-1 flex items-center gap-2">
+                        <i class="ph ph-calendar-blank"></i> <span id="dash-date">Hôm nay</span>
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="createMockOrder()" class="btn-secondary text-sm shadow-sm"><i class="ph ph-plus"></i> Giả lập Đơn</button>
+                    <button onclick="switchTab('analytics')" class="btn-primary text-sm shadow-sm"><i class="ph ph-chart-pie"></i> Xem báo cáo</button>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-teal-500">
+                    <i class="ph ph-coins kpi-icon-bg text-teal-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Doanh thu</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-revenue">0đ</h3>
+                    <p class="text-sm mt-3 flex items-center font-medium" id="kpi-rev-trend">
+                        <span class="text-slate-400">Đang tính...</span>
+                    </p>
+                </div>
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-blue-500">
+                    <i class="ph ph-receipt kpi-icon-bg text-blue-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Số đơn thành công</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-orders">0</h3>
+                    <p class="text-sm mt-3 flex items-center gap-2">
+                        <span class="text-orange-500 font-semibold bg-orange-50 px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer hover:bg-orange-100 transition-colors" onclick="switchTab('orders')">
+                            <i class="ph ph-clock text-lg"></i> <span id="kpi-pending">0</span> chờ duyệt
+                        </span>
+                    </p>
+                </div>
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-purple-500">
+                    <i class="ph ph-shopping-cart kpi-icon-bg text-purple-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Giá trị TB / Đơn</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-aov">0đ</h3>
+                    <p class="text-sm mt-3 text-slate-500 font-medium">Chỉ tính đơn hoàn thành</p>
+                </div>
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-emerald-500">
+                    <i class="ph ph-check-circle kpi-icon-bg text-emerald-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Tỉ lệ hoàn thành</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-rate">0%</h3>
+                    <p class="text-sm mt-3 text-slate-500 font-medium" id="kpi-rate-sub">0 hủy / 0 tổng</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-6 lg:col-span-2 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-lg">Biến động 7 ngày qua</h3>
+                    </div>
+                    <div class="flex-1 min-h-[250px] relative w-full">
+                        <canvas id="miniChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-0 flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-slate-200/50 flex justify-between items-center bg-white/30">
+                        <h3 class="font-bold text-slate-800 text-lg">Đơn mới cập nhật</h3>
+                        <button onclick="switchTab('orders')" class="text-teal-600 text-sm font-semibold hover:underline">Xem tất cả</button>
+                    </div>
+                    <div id="dash-recent-orders" class="flex-1 overflow-y-auto p-2 space-y-1">
+                        <div class="p-6 text-center text-slate-400 text-sm italic">Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: ANALYTICS (PRO)                     -->
+        <!-- ========================================== -->
+        <section id="tab-analytics" class="tab-content">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Phân tích & Báo cáo</h2>
+                <button onclick="exportProReport()" class="btn-primary shadow-sm">
+                    <i class="ph ph-download-simple text-lg"></i> Xuất Báo Cáo Excel/CSV
+                </button>
+            </div>
+
+            <div class="glass-card p-4 mb-6 flex flex-wrap items-center gap-4">
+                <div class="flex bg-slate-100/60 p-1 rounded-lg backdrop-blur-sm border border-slate-200/50">
+                    <button class="px-4 py-1.5 text-sm font-semibold rounded-md transition-colors filter-btn text-slate-600" data-days="0" onclick="setProRange(0, this)">Hôm nay</button>
+                    <button class="px-4 py-1.5 text-sm font-semibold rounded-md transition-colors filter-btn text-slate-600" data-days="1" onclick="setProRange(1, this)">Hôm qua</button>
+                    <button class="px-4 py-1.5 text-sm font-semibold rounded-md transition-colors filter-btn active bg-white shadow-sm text-teal-700" data-days="7" onclick="setProRange(7, this)">7 ngày</button>
+                    <button class="px-4 py-1.5 text-sm font-semibold rounded-md transition-colors filter-btn text-slate-600" data-days="30" onclick="setProRange(30, this)">30 ngày</button>
+                </div>
+                <div class="h-6 w-px bg-slate-300 hidden md:block"></div>
+                <div class="flex items-center gap-2">
+                    <input type="date" id="pro-date-from" class="form-input text-sm py-1.5 w-auto" onchange="applyCustomProRange()">
+                    <span class="text-slate-500 text-sm font-medium">đến</span>
+                    <input type="date" id="pro-date-to" class="form-input text-sm py-1.5 w-auto" onchange="applyCustomProRange()">
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="glass-card p-6 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 text-lg">Biểu đồ Doanh thu & Đơn hàng</h3>
+                        <select id="chart-metric" class="form-input text-sm py-1 w-auto" onchange="updateProCharts()">
+                            <option value="revenue">Xem theo Doanh thu</option>
+                            <option value="orders">Xem theo Số lượng đơn</option>
+                        </select>
+                    </div>
+                    <div class="h-72 w-full"><canvas id="mainProChart"></canvas></div>
+                </div>
+                <div class="glass-card p-6">
+                    <!-- Đổi thành Top 3 thay vì Top 5 -->
+                    <h3 class="font-bold text-slate-800 text-lg mb-4">Sản phẩm bán chạy (Top 3)</h3>
+                    <div class="h-60 w-full"><canvas id="productPieChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- PEAK HOURS CHART -->
+            <div class="glass-card p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-lg">Khung giờ đặt hàng (Peak Hours)</h3>
+                        <p class="text-sm text-slate-500">Giúp tối ưu nhân sự theo lượng đơn hàng trong ngày.</p>
+                    </div>
+                </div>
+                <div class="h-64 w-full"><canvas id="peakHoursChart"></canvas></div>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <div class="p-5 border-b border-slate-200/50 bg-white/30 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">Chi tiết theo ngày</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="pro-table w-full text-left">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Số đơn</th>
+                                <th>Hoàn thành</th>
+                                <th>Bị Hủy</th>
+                                <th>Doanh thu</th>
+                                <th>TB / Đơn</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pro-report-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: CUSTOMERS CRM (UPDATED - NO EMAIL)  -->
+        <!-- ========================================== -->
+        <section id="tab-customers" class="tab-content">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Khách hàng CRM</h2>
+                    <p class="text-slate-500 mt-1">Dữ liệu được tổng hợp tự động dựa trên số điện thoại khách hàng.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-blue-500">
+                    <i class="ph ph-users kpi-icon-bg text-blue-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Tổng KH Duy nhất</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-total-customers">0</h3>
+                </div>
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-emerald-500">
+                    <i class="ph ph-arrows-clockwise kpi-icon-bg text-emerald-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Khách hàng Quay lại</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-returning-customers">0</h3>
+                    <p class="text-sm mt-3 text-slate-500 font-medium" id="kpi-returning-rate">0% tỷ lệ giữ chân</p>
+                </div>
+                <div class="glass-card kpi-card p-6 border-t-4 border-t-purple-500">
+                    <i class="ph ph-star kpi-icon-bg text-purple-500"></i>
+                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Chi tiêu TB/Khách (LTV)</p>
+                    <h3 class="text-3xl font-bold text-slate-800" id="kpi-ltv">0đ</h3>
+                </div>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <div class="p-4 border-b border-slate-200/50 bg-white/30">
+                    <div class="relative max-w-md">
+                        <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input id="customer-search" type="text" oninput="renderCustomerTable()" placeholder="Tìm tên khách hàng, số điện thoại..." class="form-input pl-10">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="pro-table w-full text-left">
+                        <thead>
+                            <tr>
+                                <th>Khách hàng</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Tổng số đơn</th>
+                                <th>Tổng chi tiêu</th>
+                                <th>Ngày mua gần nhất</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-tbody">
+                            <tr><td colspan="5" class="text-center py-10 text-slate-400 italic">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: AI CHAT                             -->
+        <!-- ========================================== -->
+        <section id="tab-ai-chat" class="tab-content">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+                    <i class="ph ph-sparkle text-indigo-500"></i> Trợ lý Giám đốc AI
+                </h2>
+                <p class="text-slate-500 mt-1">Hỏi AI mọi thứ về tình hình kinh doanh, doanh thu, phân tích khách hàng.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[600px]">
+                <div class="lg:col-span-1 flex flex-col gap-4">
+                    <div class="glass-card p-5 bg-indigo-50/80 border-indigo-100">
+                        <h4 class="font-bold text-indigo-900 mb-2 flex items-center gap-2"><i class="ph ph-database"></i> Dữ liệu AI đang học</h4>
+                        <p class="text-sm text-indigo-700 mb-1">Khoảng thời gian: <strong id="ai-date-range">30 ngày qua</strong></p>
+                        <p class="text-xs text-indigo-500 mt-2"><i class="ph ph-check-circle"></i> Đã nạp dữ liệu Khách hàng</p>
+                        <p class="text-xs text-indigo-500"><i class="ph ph-check-circle"></i> Đã nạp dữ liệu Khung giờ</p>
+                    </div>
+                    
+                    <div class="glass-card p-5 flex-1">
+                        <h4 class="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">Câu hỏi gợi ý</h4>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="fillAiChat('Phân tích hành vi khách hàng: Tỷ lệ quay lại và LTV hiện tại.')" class="text-left text-sm p-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors">👥 Phân tích tệp khách hàng</button>
+                            <button onclick="fillAiChat('Khung giờ nào quán đông nhất? Đề xuất khuyến mãi khung giờ vắng.')" class="text-left text-sm p-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors">⏳ Tối ưu giờ Peak/Off-peak</button>
+                            <button onclick="fillAiChat('Tóm tắt tình hình kinh doanh tuần qua.')" class="text-left text-sm p-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors">📊 Tóm tắt báo cáo chung</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card lg:col-span-3 chat-container overflow-hidden">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message ai">
+                            <p>👋 Chào Sếp! Dữ liệu của tôi đã được cập nhật thống kê <strong>Khách hàng duy nhất</strong> và <strong>Khung giờ Peak Hours</strong>.</p>
+                            <p>Sếp cần tôi phân tích chiến lược giữ chân khách hàng hay phân tích doanh thu hôm nay?</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="ai-chat-input" class="form-input flex-1 border-slate-300" placeholder="Hỏi AI..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+                        <button onclick="sendAiMessage()" id="btn-send-ai" class="btn-primary w-12 justify-center px-0 flex-shrink-0">
+                            <i class="ph ph-paper-plane-right text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: ORDERS & TAB 6: PRODUCTS            -->
+        <!-- ========================================== -->
+        <section id="tab-orders" class="tab-content">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Quản lý Đơn hàng</h2>
+                <div class="flex gap-3">
+                    <select id="order-filter" onchange="renderOrdersTable()" class="form-input w-auto font-semibold text-sm">
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="pending">Chờ duyệt</option>
+                        <option value="processing">Đang pha chế</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <div class="p-4 border-b border-slate-200/50 bg-white/30">
+                    <div class="relative max-w-md">
+                        <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input id="order-search" type="text" oninput="renderOrdersTable()" placeholder="Tìm tên, Số điện thoại..." class="form-input pl-10">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="pro-table w-full">
+                        <thead>
+                            <tr>
+                                <th>Mã Đơn / Giờ</th>
+                                <th>Khách hàng</th>
+                                <th>Chi tiết món</th>
+                                <th>Tổng thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th class="text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SẢN PHẨM (Đã sửa đổi để hiển thị hình ảnh) -->
+        <section id="tab-products" class="tab-content">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Menu Sản phẩm</h2>
+                <button class="btn-primary shadow-sm" onclick="alert('Tính năng Thêm/Sửa đang được phát triển ở module sau.')">
+                    <i class="ph ph-plus"></i> Thêm món mới
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6" id="products-grid">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<div id="toast" class="bg-white rounded-xl shadow-2xl border border-slate-100 flex items-center gap-4 p-4 min-w-[300px]">
+    <div id="toast-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"></div>
+    <div>
+        <p class="font-bold text-slate-800 text-sm" id="toast-title">Tiêu đề</p>
+        <p class="text-sm text-slate-500 mt-0.5" id="toast-msg">Nội dung</p>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAcnysK7mnyRDHirN7K29uuyZtUjmg3uNU",
+    projectId: "bonstea-d0e2c",
+    appId: "1:120865795098:web:807507c33b392f71a575a3",
+};
+const myAppId = 'bonstea_app';
+const geminiApiKey = "AIzaSyCUcL19qaxlttQSnln8AcNsyGGCJ8AOyJg"; 
+
+window.appData = {
+    orders: [], products: [], customers: [],
+    charts: { mini: null, main: null, pie: null, peak: null },
+    proRangeDays: 7
+};
+let db, auth;
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    initFirebase();
+    const today = new Date();
+    document.getElementById('pro-date-to').value = today.toISOString().split('T')[0];
+    const past = new Date(today); past.setDate(past.getDate() - 6);
+    document.getElementById('pro-date-from').value = past.toISOString().split('T')[0];
+    document.getElementById('dash-date').textContent = today.toLocaleDateString('vi-VN', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+});
+
+async function initFirebase() {
+    try {
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        await signInAnonymously(auth);
+        onAuthStateChanged(auth, user => {
+            if (user) setupListeners();
+        });
+    } catch (e) {
+        showToast("Lỗi", "Không thể kết nối CSDL", "error");
+    }
+}
+
+function setupListeners() {
+    const ordersRef = collection(db, 'artifacts', myAppId, 'public', 'data', 'bonstea_orders');
+    const productsRef = collection(db, 'artifacts', myAppId, 'public', 'data', 'bonstea_products');
+
+    onSnapshot(ordersRef, snap => {
+        window.appData.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+        refreshUI();
+    });
+
+    onSnapshot(productsRef, snap => {
+        window.appData.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderProductsGrid(); // Gọi hàm render có fallback data
+    });
+}
+
+function refreshUI() {
+    updateDashboard();
+    renderOrdersTable();
+    updateProCharts();
+    updateCustomerDashboard();
+}
+
+// --- DASHBOARD ---
+function updateDashboard() {
+    const orders = window.appData.orders;
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const yesterdayStart = new Date(todayStart); yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    
+    let todayRev = 0, todayOrders = 0, pending = 0, todayCancel = 0, todayTotal = 0, yestRev = 0;
+
+    orders.forEach(o => {
+        const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+        if (d >= todayStart) {
+            todayTotal++;
+            if (o.status === 'completed') { todayRev += (o.totalAmount || 0); todayOrders++; }
+            if (o.status === 'cancelled') { todayCancel++; }
+        }
+        if (d >= yesterdayStart && d < todayStart) {
+            if (o.status === 'completed') yestRev += (o.totalAmount || 0);
+        }
+        if (o.status === 'pending') pending++;
+    });
+
+    document.getElementById('kpi-revenue').textContent = fmtMoney(todayRev);
+    document.getElementById('kpi-orders').textContent = todayOrders;
+    document.getElementById('kpi-aov').textContent = todayOrders > 0 ? fmtMoney(todayRev/todayOrders) : '0đ';
+    document.getElementById('kpi-rate').textContent = todayTotal > 0 ? Math.round((todayOrders/todayTotal)*100) + '%' : '0%';
+    document.getElementById('kpi-rate-sub').textContent = `${todayCancel} hủy / ${todayTotal} tổng`;
+    
+    const badge = document.getElementById('nav-badge');
+    document.getElementById('kpi-pending').textContent = pending;
+    if(pending > 0) { badge.textContent = pending; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+
+    const trendEl = document.getElementById('kpi-rev-trend');
+    if (yestRev === 0 && todayRev > 0) {
+        trendEl.innerHTML = `<i class="ph ph-trend-up text-emerald-500 mr-1"></i> <span class="text-emerald-500">Doanh thu đầu tiên!</span>`;
+    } else if (yestRev === 0) {
+        trendEl.innerHTML = `<span class="text-slate-400">Chưa có dữ liệu so sánh</span>`;
+    } else {
+        const pct = ((todayRev - yestRev) / yestRev) * 100;
+        const isUp = pct >= 0;
+        const color = isUp ? 'text-emerald-500' : 'text-rose-500';
+        trendEl.innerHTML = `<i class="ph ${isUp?'ph-trend-up':'ph-trend-down'} ${color} mr-1"></i> <span class="${color}">${isUp?'+':''}${pct.toFixed(1)}%</span>`;
+    }
+
+    const recentEl = document.getElementById('dash-recent-orders');
+    const recentList = orders.slice(0, 5);
+    if(recentList.length === 0) recentEl.innerHTML = '<div class="p-6 text-center text-slate-400 text-sm italic">Chưa có đơn hàng nào</div>';
+    else recentEl.innerHTML = recentList.map(o => `
+        <div class="flex justify-between items-center p-3 rounded-lg hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs">${o.customerName?.substring(0,2)||'KH'}</div>
+                <div><p class="font-bold text-slate-800 text-sm">${o.customerName||'Khách'}</p><p class="text-xs text-slate-500">${fmtDate(o.createdAt)}</p></div>
+            </div>
+            <div class="text-right"><p class="font-bold text-teal-700 text-sm">${fmtMoney(o.totalAmount)}</p></div>
+        </div>`).join('');
+
+    const data = aggregateDailyData(7);
+    if(window.appData.charts.mini) {
+        window.appData.charts.mini.data.labels = data.labels;
+        window.appData.charts.mini.data.datasets[0].data = data.revenues;
+        window.appData.charts.mini.update();
+    }
+}
+
+// --- CUSTOMER CRM (UPDATED - NO EMAIL) ---
+function updateCustomerDashboard() {
+    const orders = window.appData.orders.filter(o => o.status === 'completed');
+    const customerMap = {};
+
+    // Group by Phone
+    orders.forEach(o => {
+        const phone = o.phone || 'Ẩn danh';
+        if (!customerMap[phone]) {
+            customerMap[phone] = {
+                name: o.customerName || 'Khách vãng lai',
+                phone: phone,
+                orderCount: 0,
+                totalSpend: 0,
+                lastOrder: null
+            };
+        }
+        customerMap[phone].orderCount++;
+        customerMap[phone].totalSpend += (o.totalAmount || 0);
+        
+        const orderDate = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+        if (!customerMap[phone].lastOrder || orderDate > customerMap[phone].lastOrder) {
+            customerMap[phone].lastOrder = orderDate;
+        }
+    });
+
+    window.appData.customers = Object.values(customerMap).sort((a, b) => b.totalSpend - a.totalSpend);
+    
+    const totalCustomers = window.appData.customers.length;
+    const returningCustomers = window.appData.customers.filter(c => c.orderCount > 1).length;
+    const totalRevenue = window.appData.customers.reduce((s, c) => s + c.totalSpend, 0);
+    const avgLtv = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
+    const returnRate = totalCustomers > 0 ? (returningCustomers / totalCustomers * 100).toFixed(1) : 0;
+
+    document.getElementById('kpi-total-customers').textContent = totalCustomers;
+    document.getElementById('kpi-returning-customers').textContent = returningCustomers;
+    document.getElementById('kpi-returning-rate').textContent = `${returnRate}% tỷ lệ giữ chân`;
+    document.getElementById('kpi-ltv').textContent = fmtMoney(avgLtv);
+
+    renderCustomerTable();
+}
+
+window.renderCustomerTable = function() {
+    const search = (document.getElementById('customer-search').value || '').toLowerCase().trim();
+    let list = window.appData.customers;
+
+    if(search) list = list.filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search));
+
+    const tbody = document.getElementById('customers-tbody');
+    if(list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">Không tìm thấy khách hàng</td></tr>`; return;
+    }
+
+    tbody.innerHTML = list.map(c => `
+        <tr>
+            <td>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xs uppercase">${c.name.substring(0,2)}</div>
+                    <p class="font-bold text-slate-800">${c.name}</p>
+                </div>
+            </td>
+            <td>
+                <p class="text-sm font-medium text-slate-700"><i class="ph ph-phone mr-1"></i>${c.phone}</p>
+            </td>
+            <td><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold">${c.orderCount} đơn</span></td>
+            <td class="font-bold text-teal-700">${fmtMoney(c.totalSpend)}</td>
+            <td class="text-sm text-slate-500">${c.lastOrder ? c.lastOrder.toLocaleDateString('vi-VN') : '—'}</td>
+        </tr>
+    `).join('');
+};
+
+// --- ANALYTICS PRO ---
+window.setProRange = function(days, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-white', 'shadow-sm', 'text-teal-700'));
+    btn.classList.add('active', 'bg-white', 'shadow-sm', 'text-teal-700');
+    const to = new Date(); let from = new Date();
+    if (days === 1) { from.setDate(from.getDate()-1); to.setDate(to.getDate()-1); } 
+    else if (days > 1) { from.setDate(from.getDate() - (days - 1)); }
+    document.getElementById('pro-date-to').value = to.toISOString().split('T')[0];
+    document.getElementById('pro-date-from').value = from.toISOString().split('T')[0];
+    updateProCharts();
+};
+window.applyCustomProRange = function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-white', 'shadow-sm', 'text-teal-700'));
+    updateProCharts();
+}
+
+function updateProCharts() {
+    const fromDate = new Date(document.getElementById('pro-date-from').value); fromDate.setHours(0,0,0,0);
+    const toDate = new Date(document.getElementById('pro-date-to').value); toDate.setHours(23,59,59,999);
+    
+    const rangeOrders = window.appData.orders.filter(o => {
+        const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+        return d >= fromDate && d <= toDate;
+    });
+
+    // Peak Hours Chart
+    const hoursCount = Array(24).fill(0);
+    rangeOrders.filter(o => o.status === 'completed').forEach(o => {
+        const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+        hoursCount[d.getHours()]++;
+    });
+    
+    if(window.appData.charts.peak) {
+        window.appData.charts.peak.data.labels = Array.from({length: 24}, (_, i) => `${i}h`);
+        window.appData.charts.peak.data.datasets[0].data = hoursCount;
+        window.appData.charts.peak.update();
+    }
+
+    // Main Chart (Bar)
+    const metric = document.getElementById('chart-metric').value;
+    const dayMs = 86400000;
+    const daysDiff = Math.round((toDate - fromDate)/dayMs) + 1;
+    const labels = [], revData = [], orderData = [], tableRows = [];
+
+    for(let i = 0; i < daysDiff; i++) {
+        const d = new Date(fromDate.getTime() + (i * dayMs));
+        const dEnd = new Date(d); dEnd.setHours(23,59,59,999);
+        labels.push(d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}));
+
+        const dayOrders = rangeOrders.filter(o => { const od = o.createdAt?.toDate ? o.createdAt.toDate() : new Date(); return od >= d && od <= dEnd; });
+        const completed = dayOrders.filter(o => o.status === 'completed');
+        const dRev = completed.reduce((s, o) => s + (o.totalAmount||0), 0);
+        
+        revData.push(dRev); orderData.push(completed.length);
+        tableRows.unshift({ date: d.toLocaleDateString('vi-VN'), total: dayOrders.length, comp: completed.length, canc: dayOrders.filter(o=>o.status==='cancelled').length, rev: dRev, avg: completed.length ? dRev/completed.length : 0 });
+    }
+
+    if(window.appData.charts.main) {
+        window.appData.charts.main.data.labels = labels;
+        window.appData.charts.main.data.datasets[0].label = metric === 'revenue' ? 'Doanh thu' : 'Số đơn';
+        window.appData.charts.main.data.datasets[0].data = metric === 'revenue' ? revData : orderData;
+        window.appData.charts.main.update();
+    }
+
+    // Pie Chart (Sửa thành Top 3)
+    const pCounts = {};
+    rangeOrders.filter(o => o.status === 'completed').forEach(o => {
+        if(o.items) o.items.split('|').forEach(str => {
+            const p = str.split('(Qty:');
+            if(p.length > 0) { const n = p[0].trim(); pCounts[n] = (pCounts[n] || 0) + (p.length > 1 ? parseInt(p[1]) : 1); }
+        });
+    });
+    // Lấy top 3 sản phẩm
+    const sortedP = Object.entries(pCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    if(window.appData.charts.pie) {
+        window.appData.charts.pie.data.labels = sortedP.map(p => p[0]);
+        window.appData.charts.pie.data.datasets[0].data = sortedP.map(p => p[1]);
+        window.appData.charts.pie.update();
+    }
+
+    // Table
+    const tbody = document.getElementById('pro-report-tbody');
+    if(tableRows.every(r => r.total === 0)) tbody.innerHTML = `<tr><td colspan="6" class="text-center italic text-slate-400 py-6">Không có dữ liệu.</td></tr>`;
+    else tbody.innerHTML = tableRows.map(r => `<tr><td class="font-medium text-slate-700">${r.date}</td><td>${r.total}</td><td class="text-emerald-600 font-bold">${r.comp}</td><td class="text-rose-500">${r.canc}</td><td class="font-bold text-teal-700">${r.rev > 0 ? fmtMoney(r.rev) : '-'}</td><td class="text-slate-500">${r.avg > 0 ? fmtMoney(r.avg) : '-'}</td></tr>`).join('');
+
+    document.getElementById('ai-date-range').textContent = `${fromDate.toLocaleDateString('vi-VN')} - ${toDate.toLocaleDateString('vi-VN')}`;
+}
+
+// --- AI CHAT ---
+window.fillAiChat = function(text) { document.getElementById('ai-chat-input').value = text; document.getElementById('ai-chat-input').focus(); }
+
+function getStoreContextForAI() {
+    const fromInput = document.getElementById('pro-date-from').value;
+    const toInput = document.getElementById('pro-date-to').value;
+    
+    // Khung giờ đông nhất
+    const peakChart = window.appData.charts.peak;
+    let peakHourStr = "Chưa có dữ liệu";
+    if (peakChart && peakChart.data.datasets[0].data.length > 0) {
+        const maxVal = Math.max(...peakChart.data.datasets[0].data);
+        if(maxVal > 0) {
+            const peakIndex = peakChart.data.datasets[0].data.indexOf(maxVal);
+            peakHourStr = `${peakIndex}h (Số lượng đơn: ${maxVal})`;
+        }
+    }
+
+    const context = {
+        thoi_gian_bao_cao: `${fromInput} den ${toInput}`,
+        tong_khach_hang_duy_nhat: window.appData.customers.length,
+        ti_le_khach_quay_lai: document.getElementById('kpi-returning-rate').textContent,
+        chi_tieu_trung_binh_1_khach_LTV: document.getElementById('kpi-ltv').textContent,
+        khung_gio_dat_hang_nhieu_nhat_Peak_Hour: peakHourStr
+    };
+    return JSON.stringify(context);
+}
+
+async function getGeminiModel() {
+    try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+        const data = await res.json();
+        const valid = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('gemini'));
+        return (valid.find(m => m.name.includes('1.5-flash')) || valid[0]).name.replace('models/', '');
+    } catch(e) { return "gemini-1.5-flash"; }
+}
+
+window.sendAiMessage = async function() {
+    const inputEl = document.getElementById('ai-chat-input');
+    const text = inputEl.value.trim();
+    if(!text) return;
+
+    appendMessage('user', text); inputEl.value = '';
+    const btn = document.getElementById('btn-send-ai'); btn.disabled = true;
+
+    const msgId = 'ai-msg-' + Date.now();
+    const chatBox = document.getElementById('chat-messages');
+    chatBox.innerHTML += `<div id="${msgId}" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const model = await getGeminiModel();
+        const systemPrompt = `Bạn là chuyên gia CRM và quản lý quán trà "Bon's Tea". Xưng "Tôi", gọi người dùng là "Sếp". Trả lời súc tích bằng Markdown.
+Dữ liệu CRM hiện tại (JSON): ${getStoreContextForAI()}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nCâu hỏi: " + text }] }] })
+        });
+        const data = await res.json();
+        document.getElementById(msgId).remove();
+        appendMessage('ai', marked.parse(data.candidates[0].content.parts[0].text), true);
+    } catch(e) {
+        document.getElementById(msgId).remove();
+        appendMessage('ai', `<p class="text-rose-500">Lỗi AI: ${e.message}</p>`, true);
+    } finally { btn.disabled = false; inputEl.focus(); }
+}
+function appendMessage(role, content, isHtml = false) {
+    const box = document.getElementById('chat-messages');
+    const div = document.createElement('div'); div.className = `message ${role}`;
+    if(isHtml) div.innerHTML = content; else div.textContent = content;
+    box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+
+// --- UTILS & INIT ---
+window.renderOrdersTable = function() {
+    const filter = document.getElementById('order-filter').value;
+    const search = document.getElementById('order-search').value.toLowerCase().trim();
+    let orders = window.appData.orders;
+    if(filter !== 'all') orders = orders.filter(o => o.status === filter);
+    if(search) orders = orders.filter(o => o.customerName?.toLowerCase().includes(search) || o.phone?.includes(search));
+
+    const tbody = document.getElementById('orders-tbody');
+    if(orders.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">Không có đơn</td></tr>`; return; }
+
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td><span class="font-mono font-bold">#${o.id.substring(0,6).toUpperCase()}</span><br><span class="text-xs text-slate-400">${fmtDate(o.createdAt)}</span></td>
+            <td>
+                <p class="font-bold">${o.customerName||'—'}</p>
+                <p class="text-xs text-slate-500">${o.phone||''}</p>
+            </td>
+            <td class="max-w-[200px]"><p class="text-sm truncate">${(o.items||'').replace(/\|/g, ', ')}</p></td>
+            <td class="font-bold text-teal-700">${fmtMoney(o.totalAmount)}</td>
+            <td><span class="badge badge-${o.status}">${statusMap[o.status]||o.status}</span></td>
+            <td class="text-right">
+                <select class="form-input py-1 text-sm w-auto" onchange="updateOrderStatus('${o.id}', this.value)" ${o.status==='completed'||o.status==='cancelled'?'disabled':''}>
+                    <option disabled selected>Đổi TT...</option><option value="pending">Chờ duyệt</option><option value="processing">Đang pha</option><option value="completed">Hoàn thành</option><option value="cancelled">Hủy</option>
+                </select>
+            </td>
+        </tr>`).join('');
+};
+
+const statusMap = {pending:'Chờ duyệt', processing:'Đang pha', completed:'Hoàn thành', cancelled:'Đã hủy'};
+window.updateOrderStatus = async function(id, status) {
+    try { await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'bonstea_orders', id), { status }); showToast("Thành công", "Đã cập nhật đơn"); } 
+    catch(e) { showToast("Lỗi", "Không thể cập nhật", "error"); }
+};
+
+window.createMockOrder = async function() {
+    if (!auth?.currentUser) return;
+    try {
+        const phones = ['0901234567', '0912223344', '0988777666', '0901234567']; 
+        const rndPhone = phones[Math.floor(Math.random()*phones.length)];
+        // Dùng đúng tên tiếng Anh giống order.html
+        const productNames = ['Pineapple Mint Tea', 'Passion Orange Tea', 'Watermelon Lime Tea'];
+        const rndP = productNames[Math.floor(Math.random()*productNames.length)];
+
+        await addDoc(collection(db,'artifacts',myAppId,'public','data','bonstea_orders'), {
+            customerName: "Khách Mock",
+            phone: rndPhone,
+            items: `${rndP} (Qty: 1)`,
+            totalAmount: 45000,
+            status: 'completed',
+            createdAt: serverTimestamp()
+        });
+        showToast('Giả lập Đơn', 'Đã tạo 1 đơn hàng mới.');
+    } catch(e) {}
+};
+
+// Đã cập nhật để hiển thị hình ảnh và chi tiết món từ order.html
+function renderProductsGrid() {
+    const grid = document.getElementById('products-grid');
+    let list = window.appData.products;
+
+    // Fallback: Nếu CSDL chưa có dữ liệu, hiển thị luôn 3 sản phẩm mặc định của order.html
+    if (!list || list.length === 0) {
+        list = [
+            { id: "p1", name: "Pineapple Mint Tea", price: 45000, image: "01.png", desc: "Pineapple + mint + pandan tea. Super fresh & cooling." },
+            { id: "p2", name: "Passion Orange Tea", price: 45000, image: "02.png", desc: "Passion fruit + orange + tea. Sweet & sour – most popular." },
+            { id: "p3", name: "Watermelon Lime Tea", price: 45000, image: "03.png", desc: "Watermelon + lime + tea. Light & refreshing." }
+        ];
+    }
+
+    grid.innerHTML = list.map(p => `
+        <div class="glass-card overflow-hidden group">
+            <div class="h-48 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                <img src="${p.image || 'https://placehold.co/400x300?text=No+Image'}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/400x300?text=No+Image'">
+                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur font-bold text-teal-700 text-sm px-3 py-1.5 rounded-lg shadow-md border border-white/50">${fmtMoney(p.price || 45000)}</div>
+            </div>
+            <div class="p-5">
+                <h4 class="font-bold text-slate-800 mb-2 truncate text-lg" title="${p.name}">${p.name}</h4>
+                <p class="text-sm text-slate-500 line-clamp-2 min-h-[2.5rem] leading-relaxed">${p.desc || 'Không có mô tả chi tiết'}</p>
+            </div>
+        </div>`).join('');
+}
+
+function aggregateDailyData(days) {
+    const labels = [], revenues = []; const today = new Date(); today.setHours(0,0,0,0);
+    for(let i=days-1; i>=0; i--) {
+        const d = new Date(today); d.setDate(d.getDate() - i); const next = new Date(d); next.setDate(next.getDate() + 1);
+        labels.push(d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}));
+        revenues.push(window.appData.orders.reduce((sum, o) => { const od = o.createdAt?.toDate ? o.createdAt.toDate() : new Date(); return (o.status==='completed' && od>=d && od<next) ? sum+(o.totalAmount||0) : sum; }, 0));
+    }
+    return { labels, revenues };
+}
+
+function fmtMoney(n) { return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n||0); }
+function fmtDate(ts) { return ts ? (ts.toDate?ts.toDate():new Date(ts)).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}) : 'Vừa xong'; }
+function showToast(title, msg, type='success') {
+    const t = document.getElementById('toast'); document.getElementById('toast-title').textContent = title; document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function initCharts() {
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    const tTip = { backgroundColor: '#0f172a', padding: 12, cornerRadius: 8 };
+    window.appData.charts.mini = new Chart(document.getElementById('miniChart'), { type: 'line', data: { labels:[], datasets:[{label:'Doanh thu', data:[], borderColor:'#0f766e', backgroundColor:'rgba(15, 118, 110, 0.15)', fill:true, tension: 0.4 }] }, options: { maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tTip}, scales:{x:{display:false}, y:{display:false}} } });
+    window.appData.charts.main = new Chart(document.getElementById('mainProChart'), { type: 'bar', data: { labels:[], datasets:[{label:'Doanh thu', data:[], backgroundColor:'#0f766e', borderRadius:6}] }, options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}} } });
+    window.appData.charts.pie = new Chart(document.getElementById('productPieChart'), { type: 'doughnut', data: { labels:[], datasets:[{data:[], backgroundColor:['#0f766e','#14b8a6','#5eead4']}] }, options: { maintainAspectRatio:false, plugins:{legend:{position: 'bottom', labels: {usePointStyle: true, padding: 20}}} } });
+    window.appData.charts.peak = new Chart(document.getElementById('peakHoursChart'), { type: 'bar', data: { labels:[], datasets:[{label:'Số đơn', data:[], backgroundColor:'#3b82f6', borderRadius:4}] }, options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}} } });
+}
+
+window.switchTab = function(id) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.nav-item[data-tab="${id}"]`)?.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${id}`)?.classList.add('active');
+    if(id === 'analytics') updateProCharts();
+    if(id === 'customers') updateCustomerDashboard();
+    document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.add('hidden');
+};
+window.openSidebar = function() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.remove('hidden'); };
+window.closeSidebar = function() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.add('hidden'); };
+
+</script>
+</body>
+</html>
